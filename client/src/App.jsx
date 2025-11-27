@@ -13,6 +13,12 @@ import AdminSquad from "./pages/admin/AdminSquad";
 import AdminMatches from "./pages/admin/AdminMatches";
 import AdminScorecard from "./pages/admin/AdminScorecard";
 import PlayerStats from "./pages/PlayerStats";
+import AdminFinance from "./pages/admin/AdminFinance";
+import PlayerFinance from "./pages/PlayerFinance";
+import AdminAttendance from "./pages/admin/AdminAttendance";
+import PlayerAttendance from "./pages/PlayerAttendance";
+import Roster from "./pages/Roster";
+import AdminPlayers from "./pages/admin/AdminPlayers";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,7 +65,7 @@ function App() {
         <Routes>
           <Route 
             path="/login" 
-            element={!isAuthenticated ? <Login setAuth={setAuth} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />} 
+            element={!isAuthenticated ? <Login setAuth={setAuth} setUserRole={setUserRole} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />} 
           />
           <Route 
             path="/register" 
@@ -74,6 +80,14 @@ function App() {
           <Route 
             path="/my-stats" 
             element={isAuthenticated ? <PlayerStats /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/my-finance" 
+            element={isAuthenticated ? <PlayerFinance /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/my-attendance" 
+            element={isAuthenticated ? <PlayerAttendance /> : <Navigate to="/login" />} 
           />
 
           {/* ADMIN ROUTE (Protected) */}
@@ -96,6 +110,24 @@ function App() {
           <Route 
             path="/admin/matches/:id/scorecard" 
             element={isAuthenticated && userRole === "admin" ? <AdminScorecard /> : <Navigate to="/dashboard" />} 
+          />
+          <Route 
+            path="/admin/finance" 
+            element={isAuthenticated && userRole === "admin" ? <AdminFinance /> : <Navigate to="/dashboard" />} 
+          />
+          <Route 
+            path="/admin/attendance" 
+            element={isAuthenticated && userRole === "admin" ? <AdminAttendance /> : <Navigate to="/dashboard" />} 
+          />
+          <Route 
+            path="/admin/players" 
+            element={isAuthenticated && userRole === "admin" ? <AdminPlayers /> : <Navigate to="/dashboard" />} 
+          />
+
+          {/* TEAM ROUTE */}
+          <Route 
+            path="/roster" 
+            element={isAuthenticated ? <Roster /> : <Navigate to="/login" />} 
           />
           
           {/* Default redirect */}

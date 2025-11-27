@@ -84,13 +84,29 @@ const [wickets, setWickets] = useState(0);
             </div>
         </div>
 
-        <div className="mx-auto mt-6 max-w-4xl text-right">
-          <Link 
-            to="/my-stats"
-            className="inline-block rounded bg-blue-600 px-6 py-2 font-bold text-white hover:bg-blue-700 shadow"
-          >
-            View Detailed History &rarr;
-          </Link>
+        {/* Quick Actions */}
+        <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
+            
+            <Link to="/roster" className="flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition border-l-4 border-blue-500">
+                <span className="text-xl mr-2">👥</span>
+                <span className="font-bold text-gray-700">View Team Roster</span>
+            </Link>
+
+            <Link to="/my-stats" className="flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition border-l-4 border-green-500">
+                <span className="text-xl mr-2">📊</span>
+                <span className="font-bold text-gray-700">My Match History</span>
+            </Link>
+
+            <Link to="/my-finance" className="flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition border-l-4 border-purple-500">
+                <span className="text-xl mr-2">💰</span>
+                <span className="font-bold text-gray-700">My Finances</span>
+            </Link>
+
+            <Link to="/my-attendance" className="flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition border-l-4 border-teal-500">
+                <span className="text-xl mr-2">📅</span>
+                <span className="font-bold text-gray-700">My Attendance</span>
+            </Link>
+
         </div>
 
     </div>

@@ -42,12 +42,12 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN ROUTE
+// LOGIN ROUTE
 router.post("/login", async (req, res) => {
   try {
-    // 1. Destructure the req.body
     const { player_id, password } = req.body;
 
-    // 2. Check if user exists (if not, throw error)
+    // 1. Check if user exists
     const user = await pool.query("SELECT * FROM users WHERE player_id = $1", [
       player_id,
     ]);
@@ -56,7 +56,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json("Password or Email is incorrect");
     }
 
-    // 3. Check if incoming password is the same as the database password
+    // 2. Check Password
     const validPassword = await bcrypt.compare(
       password,
       user.rows[0].password_hash
@@ -66,7 +66,13 @@ router.post("/login", async (req, res) => {
       return res.status(401).json("Password or Email is incorrect");
     }
 
-    // 4. Give them the token
+    // --- NEW CHECK: BLOCK PENDING USERS ---
+    if (user.rows[0].status === 'pending') {
+        return res.status(403).json("Account is pending Admin approval. Please contact your captain.");
+    }
+    // --------------------------------------
+
+    // 3. Issue Token
     const token = jwt.sign({ user: user.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.json({ token, user: user.rows[0] });

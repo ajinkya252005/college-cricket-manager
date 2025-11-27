@@ -12,6 +12,8 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/tournaments", require("./routes/tournaments"));
 app.use("/api/players", require("./routes/players"));
 app.use("/api/matches", require("./routes/matches"));
+app.use("/api/finance", require("./routes/finance"));
+app.use("/api/attendance", require("./routes/attendance"));
 // 1. Test Route (To check if server is running)
 app.get("/", (req, res) => {
   res.send("Server is running correctly!");

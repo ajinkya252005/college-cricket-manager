@@ -50,6 +50,12 @@ const AdminDashboard = ({ setAuth }) => {
           <p className="text-gray-400">Log payments and track expenses.</p>
         </Link>
 
+        {/* Card 4: Attendance */}
+        <Link to="/admin/attendance" className="block transform rounded-lg bg-gray-800 p-6 shadow-lg transition hover:scale-105 hover:bg-gray-750">
+          <h2 className="mb-2 text-2xl font-bold text-teal-400">📅 Attendance</h2>
+          <p className="text-gray-400">Mark daily practice attendance.</p>
+        </Link>
+
       </div>
     </div>
   );
