@@ -52,6 +52,7 @@ const PlayerStats = () => {
                 <th className="p-4">Result</th>
                 <th className="p-4 text-center bg-blue-900">Runs</th>
                 <th className="p-4 text-center bg-purple-900">Wickets</th>
+                <th className="p-4 text-center">Scorecard</th>
               </tr>
             </thead>
             <tbody>
@@ -63,6 +64,16 @@ const PlayerStats = () => {
                   <td className="p-4 text-sm">{match.result}</td>
                   <td className="p-4 text-center font-bold text-blue-600 text-lg">{match.runs_scored}</td>
                   <td className="p-4 text-center font-bold text-purple-600 text-lg">{match.wickets_taken}</td>
+                  
+                  {/* NEW BUTTON */}
+                  <td className="p-4 text-center">
+                    <Link 
+                        to={`/match/${match.match_id}`}
+                        className="text-xs bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700"
+                    >
+                        View Scorecard
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

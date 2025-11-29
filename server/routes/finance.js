@@ -1,8 +1,9 @@
 const router = require("express").Router();
 const pool = require("../db");
+const authorize = require("../middleware/authorization");
 
 // 1. ADD A NEW TRANSACTION (Admin Only)
-router.post("/add", async (req, res) => {
+router.post("/add", authorize, async (req, res) => {
   try {
     const { user_id, amount, type, description } = req.body;
     // type should be 'payment_in' or 'expense'
@@ -53,7 +54,7 @@ router.get("/my/:userId", async (req, res) => {
 });
 
 // 4. UPDATE REIMBURSEMENT AMOUNT (Admin Only)
-router.put("/reimburse/:id", async (req, res) => {
+router.put("/reimburse/:id", authorize, async (req, res) => {
   try {
     const { id } = req.params;
     const { amount } = req.body; // Admin sends the specific amount (e.g., 200)

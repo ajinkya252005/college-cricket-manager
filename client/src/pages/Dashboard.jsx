@@ -107,6 +107,11 @@ const [wickets, setWickets] = useState(0);
                 <span className="font-bold text-gray-700">My Attendance</span>
             </Link>
 
+            <Link to="/career-stats" className="flex items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition border-l-4 border-yellow-500">
+                <span className="text-xl mr-2">📈</span>
+                <span className="font-bold text-gray-700">Detailed Career Stats</span>
+            </Link>
+
         </div>
 
     </div>

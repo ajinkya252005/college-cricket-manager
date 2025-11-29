@@ -19,6 +19,8 @@ import AdminAttendance from "./pages/admin/AdminAttendance";
 import PlayerAttendance from "./pages/PlayerAttendance";
 import Roster from "./pages/Roster";
 import AdminPlayers from "./pages/admin/AdminPlayers";
+import PlayerCareerStats from "./pages/PlayerCareerStats";
+import MatchDetails from "./pages/MatchDetails";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -89,6 +91,10 @@ function App() {
             path="/my-attendance" 
             element={isAuthenticated ? <PlayerAttendance /> : <Navigate to="/login" />} 
           />
+          <Route 
+            path="/career-stats" 
+            element={isAuthenticated ? <PlayerCareerStats /> : <Navigate to="/login" />} 
+          />
 
           {/* ADMIN ROUTE (Protected) */}
           <Route 
@@ -128,6 +134,10 @@ function App() {
           <Route 
             path="/roster" 
             element={isAuthenticated ? <Roster /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/match/:id" 
+            element={isAuthenticated ? <MatchDetails /> : <Navigate to="/login" />} 
           />
           
           {/* Default redirect */}

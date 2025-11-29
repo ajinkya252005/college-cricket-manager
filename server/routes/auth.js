@@ -98,7 +98,7 @@ router.get("/verify", async (req, res) => {
 
     // 3. If valid, return the user info
     const user = await pool.query(
-  "SELECT user_id, player_id, full_name, role, branch, total_matches, total_runs, total_wickets FROM users WHERE user_id = $1", 
+  "SELECT * FROM users WHERE user_id = $1", 
   [payload.user]
 );
 

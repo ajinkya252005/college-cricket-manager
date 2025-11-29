@@ -44,7 +44,7 @@ const AdminFinance = () => {
 
       const response = await fetch("http://localhost:5000/api/finance/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
         body: JSON.stringify(body),
       });
 
@@ -71,7 +71,7 @@ const AdminFinance = () => {
         try {
             const response = await fetch(`http://localhost:5000/api/finance/reimburse/${id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
                 body: JSON.stringify({ amount: newAmount })
             });
             if(response.ok) {
