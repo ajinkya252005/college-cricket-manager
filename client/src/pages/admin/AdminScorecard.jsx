@@ -22,6 +22,11 @@ const AdminScorecard = () => {
   // 2. Opponent Stats (Arrays for manual entry)
   const [oppBatting, setOppBatting] = useState([]);
   const [oppBowling, setOppBowling] = useState([]);
+  // 3. Team Stats
+  const [summary, setSummary] = useState({
+    team1_runs: "", team1_wickets: "", team1_overs: "",
+    team2_runs: "", team2_wickets: "", team2_overs: ""
+    });
 
   // --- DRAG AND DROP REFS ---
   const dragItem = useRef(null);
@@ -35,6 +40,16 @@ const AdminScorecard = () => {
         const matchRes = await fetch(`http://localhost:5000/api/matches/${id}`, { headers: { token } });
         const matchData = await matchRes.json();
         setMatchDetails(matchData);
+        if(matchData.team1_score !== undefined) { // Check if data exists
+            setSummary({
+                team1_runs: matchData.team1_score || "",
+                team1_wickets: matchData.team1_wickets || "",
+                team1_overs: matchData.team1_overs || "",
+                team2_runs: matchData.team2_score || "",
+                team2_wickets: matchData.team2_wickets || "",
+                team2_overs: matchData.team2_overs || ""
+            });
+        }
         if(matchData.result) {
             const cleanResult = matchData.result.includes("Result: ") ? matchData.result.split("Result: ")[1] : matchData.result;
             setResult(cleanResult);
@@ -166,6 +181,7 @@ const AdminScorecard = () => {
             headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
             body: JSON.stringify({ 
                 result: fullResult, 
+                match_summary: summary,
                 our_team_stats: ourDataPayload, 
                 opponent_stats: [...oppBatPayload, ...oppBowlPayload], 
                 // We save the 'ourDataPayload' which respects the SQUAD ORDER we just sorted
@@ -387,6 +403,34 @@ const AdminScorecard = () => {
                     <label className="text-xs text-gray-400 block">Decision</label>
                     <select className="bg-gray-700 p-2 rounded border border-gray-600" value={toss.decision} onChange={e=>setToss({...toss, decision: e.target.value})}><option value="bat">Bat First</option><option value="bowl">Bowl First</option></select>
                 </div>
+            </div>
+        </div>
+
+        {/* SCORE SUMMARY INPUTS */}
+        <div className="bg-gray-800 p-4 rounded-lg shadow-lg mb-6 border border-gray-700 text-white">
+            <h3 className="text-sm font-bold text-gray-400 mb-2 uppercase">Innings Totals (Final Score)</h3>
+            <div className="grid grid-cols-2 gap-8">
+                
+                {/* Innings 1 */}
+                <div className="bg-gray-700 p-3 rounded">
+                    <p className="text-xs text-blue-300 font-bold mb-2">1st Innings ({weBatFirst ? "Us" : "Opponent"})</p>
+                    <div className="flex gap-2">
+                        <input type="number" placeholder="Runs" className="w-1/3 p-1 rounded text-black" value={summary.team1_runs} onChange={e=>setSummary({...summary, team1_runs: e.target.value})} />
+                        <input type="number" placeholder="Wkts" className="w-1/3 p-1 rounded text-black" value={summary.team1_wickets} onChange={e=>setSummary({...summary, team1_wickets: e.target.value})} />
+                        <input type="number" placeholder="Overs" className="w-1/3 p-1 rounded text-black" value={summary.team1_overs} onChange={e=>setSummary({...summary, team1_overs: e.target.value})} />
+                    </div>
+                </div>
+
+                {/* Innings 2 */}
+                <div className="bg-gray-700 p-3 rounded">
+                    <p className="text-xs text-green-300 font-bold mb-2">2nd Innings ({!weBatFirst ? "Us" : "Opponent"})</p>
+                    <div className="flex gap-2">
+                        <input type="number" placeholder="Runs" className="w-1/3 p-1 rounded text-black" value={summary.team2_runs} onChange={e=>setSummary({...summary, team2_runs: e.target.value})} />
+                        <input type="number" placeholder="Wkts" className="w-1/3 p-1 rounded text-black" value={summary.team2_wickets} onChange={e=>setSummary({...summary, team2_wickets: e.target.value})} />
+                        <input type="number" placeholder="Overs" className="w-1/3 p-1 rounded text-black" value={summary.team2_overs} onChange={e=>setSummary({...summary, team2_overs: e.target.value})} />
+                    </div>
+                </div>
+
             </div>
         </div>
 

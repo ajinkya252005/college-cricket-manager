@@ -123,10 +123,48 @@ const MatchDetails = () => {
         <Link to="/my-stats" className="text-blue-600 hover:underline mb-4 inline-block">&larr; Back to History</Link>
         
         {/* MATCH HEADER */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6 border-l-4 border-blue-600">
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">vs {match.opponent_name}</h1>
-            <p className="text-gray-500 text-sm">{new Date(match.match_date).toDateString()} • {match.tournament_name}</p>
-            <p className="mt-3 text-lg font-semibold text-gray-700">{match.result}</p>
+        {/* MATCH HEADER SCOREBOARD */}
+        <div className="bg-gradient-to-r from-blue-900 to-gray-800 p-6 rounded-lg shadow-xl mb-6 text-white">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h1 className="text-3xl font-bold">vs {match.opponent_name}</h1>
+                    <p className="text-blue-300 text-sm">{new Date(match.match_date).toDateString()} • {match.tournament_name}</p>
+                </div>
+                <div className="text-right">
+                    <span className="bg-white text-blue-900 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                        {match.result && match.result.split(".")[1] ? match.result.split(".")[1] : "Result"}
+                    </span>
+                </div>
+            </div>
+
+            {/* BIG SCORES */}
+            <div className="flex justify-between items-center border-t border-blue-700 pt-4">
+                
+                {/* Team 1 */}
+                <div className="text-center">
+                    <p className="text-gray-400 text-xs uppercase mb-1">1st Innings</p>
+                    <div className="text-4xl font-bold">
+                        {match.team1_score}/{match.team1_wickets}
+                    </div>
+                    <p className="text-blue-300 text-sm">{match.team1_overs} Overs</p>
+                </div>
+
+                <div className="text-2xl text-gray-500 font-thin">vs</div>
+
+                {/* Team 2 */}
+                <div className="text-center">
+                    <p className="text-gray-400 text-xs uppercase mb-1">2nd Innings</p>
+                    <div className="text-4xl font-bold">
+                        {match.team2_score}/{match.team2_wickets}
+                    </div>
+                    <p className="text-blue-300 text-sm">{match.team2_overs} Overs</p>
+                </div>
+
+            </div>
+            
+            <p className="text-center text-xs text-gray-400 mt-4 italic">
+                {match.result && match.result.split(".")[0]} {/* Toss Info */}
+            </p>
         </div>
 
         {/* TABS */}

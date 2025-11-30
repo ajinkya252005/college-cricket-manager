@@ -18,10 +18,19 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 2. GET ALL TOURNAMENTS
+// 2. GET ALL TOURNAMENTS (Auto-Calculated Status)
 router.get("/", async (req, res) => {
   try {
-    const allTournaments = await pool.query("SELECT * FROM tournaments ORDER BY start_date DESC");
+    const allTournaments = await pool.query(`
+      SELECT tournament_id, name, start_date, end_date,
+      CASE
+        WHEN CURRENT_DATE < start_date THEN 'upcoming'
+        WHEN CURRENT_DATE > end_date THEN 'completed'
+        ELSE 'ongoing'
+      END as status
+      FROM tournaments 
+      ORDER BY start_date DESC
+    `);
     res.json(allTournaments.rows);
   } catch (err) {
     console.error(err.message);
@@ -69,6 +78,35 @@ router.get("/:id/squad", async (req, res) => {
       [id]
     );
     res.json(squad.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// 5. REMOVE PLAYER FROM SQUAD (Constraint: No Matches Scheduled)
+router.delete("/:id/squad/:userId", async (req, res) => {
+  try {
+    const { id, userId } = req.params; // id = tournament_id
+
+    // 1. Check if matches exist for this tournament
+    // If even ONE match is scheduled, we lock the squad to preserve integrity.
+    const matchCheck = await pool.query(
+        "SELECT count(*) FROM matches WHERE tournament_id = $1",
+        [id]
+    );
+
+    if (parseInt(matchCheck.rows[0].count) > 0) {
+        return res.status(400).json("Cannot remove players: Matches are already scheduled or played.");
+    }
+
+    // 2. Remove the player
+    await pool.query(
+        "DELETE FROM tournament_squads WHERE tournament_id = $1 AND user_id = $2",
+        [id, userId]
+    );
+
+    res.json("Player removed from squad");
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

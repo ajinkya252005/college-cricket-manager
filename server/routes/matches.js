@@ -127,7 +127,7 @@ router.post("/:id/scorecard", async (req, res) => {
   const client = await pool.connect(); 
   try {
     const { id } = req.params; // Match ID
-    const { result, our_team_stats, opponent_stats, full_scorecard } = req.body;
+    const { result, our_team_stats, opponent_stats, full_scorecard, match_summary } = req.body;
 
     await client.query("BEGIN");
 
@@ -156,10 +156,23 @@ router.post("/:id/scorecard", async (req, res) => {
     await client.query("DELETE FROM opponent_participation WHERE match_id = $1", [id]);
 
     // --- STEP 3: UPDATE MATCH RESULT ---
-    // We don't need scorecard_data JSON anymore for opponents, but we can keep it for caching if needed.
-    // For now, let's rely on the tables.
+    // We expect 'match_summary' object in req.body
     
-    await client.query("UPDATE matches SET result = $1, scorecard_data = $2 WHERE match_id = $3", [result, JSON.stringify(full_scorecard), id]);
+    await client.query(
+        `UPDATE matches SET 
+            result = $1, 
+            scorecard_data = $2,
+            team1_score = $3, team1_wickets = $4, team1_overs = $5,
+            team2_score = $6, team2_wickets = $7, team2_overs = $8
+         WHERE match_id = $9`, 
+        [
+            result, 
+            JSON.stringify(full_scorecard),
+            match_summary.team1_runs, match_summary.team1_wickets, match_summary.team1_overs,
+            match_summary.team2_runs, match_summary.team2_wickets, match_summary.team2_overs,
+            id
+        ]
+    );
 
     // --- STEP 4: INSERT OUR TEAM & UPDATE CAREER STATS ---
     for (const p of our_team_stats) {
@@ -188,6 +201,38 @@ router.post("/:id/scorecard", async (req, res) => {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [id, p.player_name, p.runs, p.balls, p.fours, p.sixes, p.is_out, p.dismissal_text, p.overs, p.runs_given, p.wickets, p.maidens]
       ); 
+    }
+
+    // --- STEP 6: AUTO-MARK ATTENDANCE FOR PLAYING XI ---
+    
+    // A. Check if an Attendance Event already exists for this match
+    const existingEvent = await client.query("SELECT event_id FROM attendance_events WHERE related_match_id = $1", [id]);
+    let eventId;
+
+    if (existingEvent.rows.length === 0) {
+        // Create New Event
+        const newEvent = await client.query(
+            "INSERT INTO attendance_events (date, event_type, description, related_match_id) VALUES (CURRENT_DATE, 'Match Day', 'Auto-generated from Scorecard', $1) RETURNING event_id",
+            [id]
+        );
+        eventId = newEvent.rows[0].event_id;
+    } else {
+        eventId = existingEvent.rows[0].event_id;
+    }
+
+    // B. Ensure Playing XI are marked present
+    // Note: We don't delete existing logs here, because Admin might have manually added bench players!
+    // We only ADD the playing XI if they are missing.
+    for (const p of our_team_stats) {
+        // Check if log exists
+        const checkLog = await client.query("SELECT log_id FROM attendance_logs WHERE user_id = $1 AND event_id = $2", [p.user_id, eventId]);
+        
+        if (checkLog.rows.length === 0) {
+            await client.query(
+                "INSERT INTO attendance_logs (user_id, event_id, date, event_type, status) VALUES ($1, $2, CURRENT_DATE, 'Match Day', 'present')",
+                [p.user_id, eventId]
+            );
+        }
     }
 
     await client.query("COMMIT");
