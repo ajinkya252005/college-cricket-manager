@@ -3,213 +3,261 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const AdminFinance = () => {
-  const [records, setRecords] = useState([]);
+  const [activeTab, setActiveTab] = useState("practice"); 
+  const [pendingPractice, setPendingPractice] = useState([]);
+  const [pendingTournaments, setPendingTournaments] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [ledger, setLedger] = useState({ practice: [], tournament: [], other: [] });
   
-  const [formData, setFormData] = useState({
-    user_id: "",
-    amount: "",
-    type: "payment_in", // Default to incoming payment
-    description: "",
-  });
+  // Billing States
+  const [billAmount, setBillAmount] = useState("");
+  const [manualSplit, setManualSplit] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]); // For custom billing
+  const [desc, setDesc] = useState("");
 
-  // Fetch Data (Records + List of Players to select from)
   const fetchData = async () => {
     try {
-      const recRes = await fetch("http://localhost:5000/api/finance/all");
-      const playRes = await fetch("http://localhost:5000/api/players"); // Reuse our players API!
+      const prac = await fetch("http://localhost:5000/api/finance/pending-practice");
+      const tourn = await fetch("http://localhost:5000/api/finance/pending-tournaments");
+      const play = await fetch("http://localhost:5000/api/players");
+      const ledg = await fetch("http://localhost:5000/api/finance/ledger");
 
-      setRecords(await recRes.json());
-      setPlayers(await playRes.json());
-    } catch (err) {
-      console.error(err.message);
-    }
+      setPendingPractice(await prac.json());
+      setPendingTournaments(await tourn.json());
+      setPlayers(await play.json());
+      setLedger(await ledg.json());
+    } catch (err) { console.error(err); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // --- HELPERS ---
+  const calculateSplit = (total, count) => count > 0 ? (total / count).toFixed(2) : 0;
 
-  // Submit New Transaction
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const body = {
-        ...formData,
-        user_id: formData.user_id === "" ? null : formData.user_id // Handle empty as null
+  // --- ACTIONS ---
+  const handleBillPractice = async (session) => {
+      if(!billAmount || !manualSplit) return toast.warning("Enter amounts!");
+      try {
+          await fetch("http://localhost:5000/api/finance/bill/practice", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
+              body: JSON.stringify({ 
+                  event_id: session.event_id, 
+                  per_head_amount: manualSplit, 
+                  description: `Practice: ${session.description || 'Session'} (${new Date(session.date).toLocaleDateString()})` 
+              })
+          });
+          toast.success("Billed!");
+          fetchData();
+          setBillAmount(""); setManualSplit("");
+      } catch (err) { console.error(err); }
+  };
+
+  const handleBillGeneral = async (type, id=null) => { // type: 'tournament' or 'general'
+      if(!billAmount || !manualSplit) return toast.warning("Enter amounts!");
+      const payload = {
+          total_bill: billAmount,
+          per_head_amount: manualSplit,
+          description: desc,
+          tournament_id: id,
+          custom_user_ids: type === 'general' ? selectedIds : [] // Empty means all active
       };
-
-      const response = await fetch("http://localhost:5000/api/finance/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        toast.success("Transaction Logged!");
-        setFormData({ user_id: "", amount: "", type: "payment_in", description: "" });
-        fetchData();
-      } else {
-        toast.error("Failed to log transaction");
-      }
-    } catch (err) {
-      console.error(err.message);
-    }
+      try {
+          await fetch("http://localhost:5000/api/finance/bill/general", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
+              body: JSON.stringify(payload)
+          });
+          toast.success("Billed!");
+          fetchData();
+          setBillAmount(""); setManualSplit(""); setDesc(""); setSelectedIds([]);
+      } catch (err) { console.error(err); }
   };
 
-  const updateReimburse = async (id, currentAmount, totalAmount) => {
-    // Ask admin for amount (Default to full amount if 0, or keep current)
-    const newAmount = prompt(
-        `Enter Reimbursement Amount (Total: ₹${totalAmount})`, 
-        currentAmount
-    );
+  const handleReimburse = async (recordId, current) => {
+      const val = prompt("Enter Reimbursed Amount:", current);
+      if(val !== null) {
+          await fetch(`http://localhost:5000/api/finance/reimburse/${recordId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
+              body: JSON.stringify({ amount: val })
+          });
+          fetchData();
+      }
+  };
 
-    if (newAmount !== null) { // If they didn't click Cancel
-        try {
-            const response = await fetch(`http://localhost:5000/api/finance/reimburse/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
-                body: JSON.stringify({ amount: newAmount })
-            });
-            if(response.ok) {
-                toast.success("Updated Reimbursement!");
-                fetchData();
-            }
-        } catch (err) {
-            console.error(err.message);
-        }
-    }
+  // --- RENDER COMPONENT: BILLING CARD ---
+  const BillingCard = ({ title, count, onBill }) => (
+      <div className="bg-gray-800 p-4 rounded mb-4 border border-gray-700">
+          <h3 className="font-bold text-lg mb-2">{title}</h3>
+          <div className="grid grid-cols-3 gap-2 items-end">
+              <div>
+                  <label className="text-xs text-gray-400">Total Amount</label>
+                  <input type="number" className="w-full bg-gray-900 p-1 rounded" value={billAmount} onChange={e=>setBillAmount(e.target.value)} />
+              </div>
+              <div className="text-center text-xs text-gray-500 pb-2">
+                  Suggested: {calculateSplit(billAmount, count)}
+              </div>
+              <div>
+                  <label className="text-xs text-gray-400">Your Split</label>
+                  <input type="number" className="w-full bg-gray-900 p-1 rounded border border-green-600" value={manualSplit} onChange={e=>setManualSplit(e.target.value)} />
+              </div>
+          </div>
+          <button onClick={onBill} className="w-full mt-3 bg-green-600 py-1 rounded font-bold hover:bg-green-500">Bill {count} Players</button>
+      </div>
+  );
+
+  // --- RENDER COMPONENT: LEDGER ROW ---
+  const LedgerRow = ({ item }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      
+      // Calculate Total Reimbursed for this event
+      const totalReimbursed = item.players.reduce((sum, p) => sum + (parseFloat(p.reimbursed) || 0), 0);
+      const totalBill = item.amount; // The total expense amount
+      const displayTitle = item.tournament_name || item.description;
+      const displayDate = item.start_date || item.payment_date;
+      return (
+          <div className="bg-gray-800 rounded mb-2 overflow-hidden border border-gray-700">
+              <div onClick={() => setIsOpen(!isOpen)} className="p-3 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition">
+                  <div>
+                      <p className="font-bold text-sm text-purple-300">{displayTitle}</p>
+                      <p className="text-xs text-gray-400">{new Date(displayDate).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                      <p className="font-bold text-white">₹{totalBill}</p>
+                      <p className="text-xs text-green-400">Recvd: ₹{totalReimbursed}</p>
+                  </div>
+              </div>
+              
+              {isOpen && (
+                  <div className="bg-gray-900 p-3 border-t border-gray-700 animate-fadeIn">
+                      <table className="w-full text-xs text-left">
+                          <thead>
+                              <tr className="text-gray-500 uppercase border-b border-gray-700">
+                                  <th className="py-2">Player</th>
+                                  <th className="py-2 text-center">Paid (Share)</th>
+                                  <th className="py-2 text-center">Reimbursed</th>
+                                  <th className="py-2 text-right">Action</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {item.players.map(p => (
+                                  <tr key={p.id} className="border-b border-gray-800 hover:bg-gray-800">
+                                      <td className="py-2 font-medium">{p.name}</td>
+                                      <td className="py-2 text-center text-gray-300">₹{p.amount}</td>
+                                      <td className={`py-2 text-center font-bold ${parseFloat(p.reimbursed) >= parseFloat(p.amount) ? 'text-green-500' : 'text-yellow-500'}`}>
+                                          ₹{p.reimbursed || 0}
+                                      </td>
+                                      <td className="py-2 text-right">
+                                          <button 
+                                            onClick={()=>handleReimburse(p.id, p.reimbursed)} 
+                                            className="text-blue-400 hover:text-blue-300 border border-blue-900 bg-blue-900 bg-opacity-20 px-2 py-1 rounded"
+                                          >
+                                              Edit
+                                          </button>
+                                      </td>
+                                  </tr>
+                              ))}
+                          </tbody>
+                      </table>
+                  </div>
+              )}
+          </div>
+      );
   };
 
   return (
     <div className="min-h-screen bg-gray-900 p-8 text-white">
-      <Link to="/admin-dashboard" className="text-gray-400 hover:text-white mb-4 inline-block">&larr; Back to Dashboard</Link>
-      
-      <h1 className="mb-6 text-3xl font-bold text-purple-400">💰 Team Finance Ledger</h1>
+        <Link to="/admin-dashboard" className="text-gray-400">&larr; Back</Link>
+        <h1 className="text-3xl font-bold text-purple-400 mb-6 mt-2">💰 Finance & Billing</h1>
 
-      {/* CREATE FORM */}
-      <div className="mb-8 rounded-lg bg-gray-800 p-6 shadow-lg border-t-4 border-purple-500">
-        <h2 className="mb-4 text-xl font-bold">Log New Transaction</h2>
-        <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-5">
-          
-          <select
-            name="type"
-            className="rounded bg-gray-700 p-2 text-white"
-            value={formData.type}
-            onChange={onChange}
-          >
-            <option value="payment_in">Incoming (Player Pays)</option>
-            <option value="expense">Expense (Team Spends)</option>
-          </select>
-
-          {/* Only show Player Dropdown if it's NOT an expense */}
-          {formData.type === "payment_in" && (
-            <select
-                name="user_id"
-                className="rounded bg-gray-700 p-2 text-white"
-                value={formData.user_id}
-                onChange={onChange}
-                required
-            >
-                <option value="">Select Player</option>
-                {players.map(p => (
-                    <option key={p.user_id} value={p.user_id}>{p.full_name} ({p.player_id})</option>
-                ))}
-            </select>
-          )}
-
-          <input
-            type="number"
-            name="amount"
-            placeholder="Amount (₹)"
-            className="rounded bg-gray-700 p-2 text-white"
-            value={formData.amount}
-            onChange={onChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="description"
-            placeholder="Description (e.g. Jersey Fee)"
-            className="rounded bg-gray-700 p-2 text-white md:col-span-1"
-            value={formData.description}
-            onChange={onChange}
-            required
-          />
-
-          <button className="rounded bg-purple-600 font-bold text-white hover:bg-purple-500">
-            Log Transaction
-          </button>
-        </form>
-      </div>
-
-      {/* LEDGER TABLE */}
-      <div className="rounded-lg bg-gray-800 p-6 shadow-lg">
-        <h2 className="mb-4 text-xl font-bold">Recent Transactions</h2>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-gray-700 text-gray-400">
-              <th className="pb-2">Date</th>
-              <th className="pb-2">Type</th>
-              <th className="pb-2">Description</th>
-              <th className="pb-2">Player</th>
-              <th className="pb-2">Amount</th>
-              <th className="pb-2">Status</th>
-              <th className="pb-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((r) => (
-              <tr key={r.record_id} className="border-b border-gray-700 hover:bg-gray-700">
-                <td className="py-3">{new Date(r.payment_date).toLocaleDateString()}</td>
-                <td className="py-3">
-                    <span className={`px-2 py-1 rounded text-xs uppercase ${r.type === 'payment_in' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
-                        {r.type === 'payment_in' ? 'Income' : 'Expense'}
-                    </span>
-                </td>
-                <td className="py-3">{r.description}</td>
-                <td className="py-3 text-gray-400">{r.full_name || "Team Expense"}</td>
-                <td className="py-3 font-bold">₹{r.amount}</td>
-                <td className="py-3">
-                    {r.type === 'expense' ? (
-                        <span className="text-gray-500">-</span>
-                    ) : (
-                        <div>
-                            {/* Show Partial Status */}
-                            <span className={`px-2 py-1 rounded text-xs uppercase ${
-                                parseFloat(r.reimbursed_amount) >= parseFloat(r.amount) 
-                                ? 'bg-blue-900 text-blue-300' // Fully Reimbursed
-                                : parseFloat(r.reimbursed_amount) > 0 
-                                    ? 'bg-yellow-900 text-yellow-300' // Partially
-                                    : 'bg-red-900 text-red-300' // None
-                            }`}>
-                                {parseFloat(r.reimbursed_amount) >= parseFloat(r.amount) ? 'Full' : 'Partial'}
-                            </span>
-                            <div className="text-xs text-gray-400 mt-1">
-                                Recvd: ₹{r.reimbursed_amount}
-                            </div>
-                        </div>
-                    )}
-                </td>
-                <td className="py-3">
-                    {r.type === 'payment_in' && (
-                        <button 
-                            onClick={() => updateReimburse(r.record_id, r.reimbursed_amount, r.amount)}
-                            className="text-xs border border-blue-500 text-blue-400 px-2 py-1 rounded hover:bg-blue-500 hover:text-white"
-                        >
-                            Edit Reimburse
-                        </button>
-                    )}
-                </td>
-              </tr>
+        {/* TABS */}
+        <div className="flex border-b border-gray-700 mb-6">
+            {['practice', 'tournament', 'other', 'ledger'].map(tab => (
+                <button 
+                    key={tab}
+                    onClick={() => { setActiveTab(tab); setBillAmount(""); setManualSplit(""); }}
+                    className={`px-6 py-3 font-bold uppercase text-sm ${activeTab === tab ? 'border-b-2 border-purple-500 text-purple-400' : 'text-gray-500'}`}
+                >
+                    {tab}
+                </button>
             ))}
-          </tbody>
-        </table>
-      </div>
+        </div>
+
+        {/* --- 1. PRACTICE --- */}
+        {activeTab === 'practice' && (
+            <div className="grid gap-4 md:grid-cols-2">
+                {pendingPractice.map(s => (
+                    <BillingCard 
+                        key={s.event_id} 
+                        title={`Session: ${new Date(s.date).toLocaleDateString()}`} 
+                        count={s.present_count}
+                        onBill={() => handleBillPractice(s)}
+                    />
+                ))}
+                {pendingPractice.length === 0 && <p className="text-gray-500">No unbilled practice sessions.</p>}
+            </div>
+        )}
+
+        {/* --- 2. TOURNAMENT --- */}
+        {activeTab === 'tournament' && (
+            <div className="grid gap-4 md:grid-cols-2">
+                {pendingTournaments.map(t => (
+                    <BillingCard 
+                        key={t.tournament_id}
+                        title={`Tournament: ${t.name}`}
+                        count={players.length} // All active players
+                        onBill={() => { setDesc(`${t.name} Fee`); handleBillGeneral('tournament', t.tournament_id); }}
+                    />
+                ))}
+            </div>
+        )}
+
+        {/* --- 3. OTHER / GENERAL --- */}
+        {activeTab === 'other' && (
+            <div className="bg-gray-800 p-6 rounded shadow-lg max-w-2xl">
+                <h3 className="font-bold mb-4">Create General Expense</h3>
+                <input type="text" placeholder="Description (e.g. Party)" className="w-full bg-gray-900 p-2 rounded mb-4" value={desc} onChange={e=>setDesc(e.target.value)} />
+                
+                <label className="block text-xs text-gray-400 mb-2">Select Payers (Leave empty for ALL)</label>
+                <div className="grid grid-cols-3 gap-2 mb-4 max-h-40 overflow-y-auto bg-gray-900 p-2 rounded">
+                    {players.map(p => (
+                        <label key={p.user_id} className="flex items-center gap-2 text-xs">
+                            <input type="checkbox" onChange={e => {
+                                if(e.target.checked) setSelectedIds([...selectedIds, p.user_id]);
+                                else setSelectedIds(selectedIds.filter(id => id !== p.user_id));
+                            }} />
+                            {p.full_name}
+                        </label>
+                    ))}
+                </div>
+
+                <BillingCard 
+                    title="Split Cost" 
+                    count={selectedIds.length > 0 ? selectedIds.length : players.length}
+                    onBill={() => handleBillGeneral('general')}
+                />
+            </div>
+        )}
+
+        {/* --- 4. LEDGER (VIEW ONLY) --- */}
+        {activeTab === 'ledger' && (
+            <div className="grid gap-6 md:grid-cols-3">
+                <div>
+                    <h3 className="text-teal-400 font-bold mb-2 uppercase text-sm border-b border-gray-700 pb-1">Practice History</h3>
+                    {ledger.practice.map(item => <LedgerRow key={item.related_event_id} item={item} />)}
+                </div>
+                <div>
+                    <h3 className="text-yellow-400 font-bold mb-2 uppercase text-sm border-b border-gray-700 pb-1">Tournament Fees</h3>
+                    {ledger.tournament.map(item => <LedgerRow key={item.related_tournament_id} item={item} />)}
+                </div>
+                <div>
+                    <h3 className="text-blue-400 font-bold mb-2 uppercase text-sm border-b border-gray-700 pb-1">Other Expenses</h3>
+                    {ledger.other.map((item, i) => <LedgerRow key={i} item={item} />)}
+                </div>
+            </div>
+        )}
+
     </div>
   );
 };

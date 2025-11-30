@@ -81,22 +81,26 @@ const PlayerFinance = () => {
                 <td className="p-4 font-semibold">{r.description}</td>
                 <td className="p-4 font-bold">₹{r.amount}</td>
                 <td className="p-4">
-                    <div className="flex flex-col">
-                        <span className="text-sm font-bold">
-                            ₹{r.reimbursed_amount} / ₹{r.amount}
+                    {r.status === 'pending' ? (
+                        <span className="px-2 py-1 rounded text-xs uppercase bg-red-100 text-red-800 font-bold border border-red-200">
+                            Due / Pending
                         </span>
-                        <span className={`text-xs uppercase font-bold ${
-                            parseFloat(r.reimbursed_amount) >= parseFloat(r.amount) 
-                            ? 'text-green-600' 
-                            : parseFloat(r.reimbursed_amount) > 0 
-                                ? 'text-yellow-600' 
-                                : 'text-red-500'
-                        }`}>
-                            {parseFloat(r.reimbursed_amount) >= parseFloat(r.amount) 
-                                ? 'Fully Reimbursed' 
-                                : 'Pending / Partial'}
-                        </span>
-                    </div>
+                    ) : (
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold">
+                                ₹{r.reimbursed_amount} / ₹{r.amount}
+                            </span>
+                            <span className={`text-xs uppercase font-bold ${
+                                parseFloat(r.reimbursed_amount) >= parseFloat(r.amount) 
+                                ? 'text-green-600' 
+                                : parseFloat(r.reimbursed_amount) > 0 
+                                    ? 'text-yellow-600' 
+                                    : 'text-green-600' // Paid but no reimburse
+                            }`}>
+                                {parseFloat(r.reimbursed_amount) > 0 ? 'Reimbursed' : 'Paid'}
+                            </span>
+                        </div>
+                    )}
                 </td>
               </tr>
             ))}
