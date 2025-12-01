@@ -9,14 +9,14 @@ const PlayerFinance = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const verifyRes = await fetch("http://localhost:5000/api/auth/verify", {
+        const verifyRes = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
             method: "GET",
             headers: { token: localStorage.getItem("token") }
         });
         const user = await verifyRes.json();
 
         if (user.user_id) {
-            const res = await fetch(`http://localhost:5000/api/finance/my/${user.user_id}`);
+            const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/finance/my/${user.user_id}`);
             const data = await res.json();
 
             // 1. Calculate Totals

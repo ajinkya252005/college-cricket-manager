@@ -21,7 +21,7 @@ const Login = ({ setAuth, setUserRole }) => {
     setLoading(true);
     try {
       const body = { player_id, password };
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

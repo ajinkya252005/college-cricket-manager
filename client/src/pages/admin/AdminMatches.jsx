@@ -15,8 +15,8 @@ const AdminMatches = () => {
   // Fetch Data
   const fetchData = async () => {
     try {
-      const matchRes = await fetch("http://localhost:5000/api/matches");
-      const tournRes = await fetch("http://localhost:5000/api/tournaments");
+      const matchRes = await fetch("https://cricket-api-ll8u.onrender.com/api/matches");
+      const tournRes = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments");
       
       setMatches(await matchRes.json());
       setTournaments(await tournRes.json());
@@ -35,7 +35,7 @@ const AdminMatches = () => {
   const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/matches", {
+      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/matches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

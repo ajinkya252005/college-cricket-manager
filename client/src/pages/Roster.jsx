@@ -8,7 +8,7 @@ const Roster = () => {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/players");
+        const response = await fetch("https://cricket-api-ll8u.onrender.com/api/players");
         const data = await response.json();
         setPlayers(data);
         setLoading(false);

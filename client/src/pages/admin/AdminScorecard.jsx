@@ -36,7 +36,7 @@ const AdminScorecard = () => {
     const fetchInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-        const matchRes = await fetch(`http://localhost:5000/api/matches/${id}`, { headers: { token } });
+        const matchRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, { headers: { token } });
         const matchData = await matchRes.json();
         setMatchDetails(matchData);
 
@@ -52,7 +52,7 @@ const AdminScorecard = () => {
         // Logic: We don't parse the old string because it's unstructured. We just start fresh or keep defaults.
 
         if (matchData.tournament_id) {
-            const squadRes = await fetch(`http://localhost:5000/api/tournaments/${matchData.tournament_id}/squad`);
+            const squadRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/tournaments/${matchData.tournament_id}/squad`);
             const squadData = await squadRes.json();
             setSquad(squadData);
             
@@ -160,7 +160,7 @@ const AdminScorecard = () => {
     try {
         const fullResultString = `Toss: ${toss.winner === 'us' ? 'We' : 'Opponent'} elected to ${toss.decision}. Result: ${resultText}`;
         
-        const response = await fetch(`http://localhost:5000/api/matches/${id}/scorecard`, {
+        const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}/scorecard`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
             body: JSON.stringify({ 

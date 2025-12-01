@@ -24,7 +24,7 @@ const MatchDetails = () => {
     const fetchMatch = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5000/api/matches/${id}`, {
+        const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, {
           headers: { token }
         });
         const data = await res.json();

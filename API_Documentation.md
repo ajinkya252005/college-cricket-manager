@@ -1,6 +1,6 @@
 # 🏏 API Documentation: College Cricket Manager
 
-**Base URL:** `http://localhost:5000/api`  
+**Base URL:** `https://cricket-api-ll8u.onrender.com/api`  
 **Authentication:** All protected routes require a `Authorization: Bearer <token>` header.
 
 ---
