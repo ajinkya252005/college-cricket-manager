@@ -1,7 +1,5 @@
 # 🏏 College Cricket Manager (The Team OS)
 
-![Project Banner](https://via.placeholder.com/1200x400.png?text=College+Cricket+Manager+Dashboard)
-*(Replace with a real screenshot of your Admin Dashboard)*
 
 ![License](https://img.shields.io/badge/License-MIT-green.svg) ![Stack](https://img.shields.io/badge/Stack-PERN-blue.svg) ![Status](https://img.shields.io/badge/Status-Production_Ready-orange.svg)
 
