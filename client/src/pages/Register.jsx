@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom"; // Add useNavigate
 
 const Register = () => {
+  const navigate = useNavigate();
   const [inputs, setInputs] = useState({
     player_id: "", password: "", confirm_password: "",
     first_name: "", middle_name: "", last_name: "",
@@ -33,7 +35,7 @@ const Register = () => {
 
       if (response.ok) {
         toast.success("Registration Submitted! Wait for approval.");
-        window.location.href = "/login";
+        navigate("/login");
       } else {
         toast.error(parseRes);
       }
