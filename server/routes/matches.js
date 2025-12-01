@@ -127,7 +127,7 @@ router.post("/:id/scorecard", async (req, res) => {
   const client = await pool.connect(); 
   try {
     const { id } = req.params; // Match ID
-    const { result, our_team_stats, opponent_stats, full_scorecard, match_summary } = req.body;
+    const { result, outcome,our_team_stats, opponent_stats, full_scorecard, match_summary } = req.body;
 
     await client.query("BEGIN");
 
@@ -156,20 +156,21 @@ router.post("/:id/scorecard", async (req, res) => {
     await client.query("DELETE FROM opponent_participation WHERE match_id = $1", [id]);
 
     // --- STEP 3: UPDATE MATCH RESULT ---
-    // We expect 'match_summary' object in req.body
-    
+    // --- STEP 3: UPDATE MATCH RESULT & TOTALS ---
     await client.query(
         `UPDATE matches SET 
             result = $1, 
-            scorecard_data = $2,
-            team1_score = $3, team1_wickets = $4, team1_overs = $5,
-            team2_score = $6, team2_wickets = $7, team2_overs = $8
-         WHERE match_id = $9`, 
+            winner = $2,  -- <--- NEW COLUMN
+            scorecard_data = $3,
+            team1_score = $4, team1_wickets = $5, team1_overs = $6,
+            team2_score = $7, team2_wickets = $8, team2_overs = $9
+         WHERE match_id = $10`, 
         [
             result, 
+            outcome.winner, // Save 'us', 'them', etc.
             JSON.stringify(full_scorecard),
-            match_summary.team1_runs, match_summary.team1_wickets, match_summary.team1_overs,
-            match_summary.team2_runs, match_summary.team2_wickets, match_summary.team2_overs,
+            match_summary?.team1_runs || 0, match_summary?.team1_wickets || 0, match_summary?.team1_overs || 0,
+            match_summary?.team2_runs || 0, match_summary?.team2_wickets || 0, match_summary?.team2_overs || 0,
             id
         ]
     );

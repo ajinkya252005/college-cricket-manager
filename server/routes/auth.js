@@ -3,36 +3,50 @@ const pool = require("../db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// REGISTER ROUTE
+// REGISTER ROUTE (Time-Aware)
 router.post("/register", async (req, res) => {
   try {
-    // 1. Destructure the req.body (name, password, etc.)
-    const { player_id, password, full_name, branch, year_of_study, joining_year } = req.body;
+    const { 
+        player_id, password, 
+        first_name, middle_name, last_name, 
+        branch, year_of_study, 
+        joining_month, joining_year,
+        birth_date 
+    } = req.body;
 
-    // 2. Check if user exists (if yes, throw error)
-    const user = await pool.query("SELECT * FROM users WHERE player_id = $1", [
-      player_id,
-    ]);
+    const user = await pool.query("SELECT * FROM users WHERE player_id = $1", [player_id]);
+    if (user.rows.length > 0) return res.status(401).json("User already exists!");
 
-    if (user.rows.length > 0) {
-      return res.status(401).json("User already exists!");
-    }
-
-    // 3. Bcrypt the user password
-    const saltRound = 10;
-    const salt = await bcrypt.genSalt(saltRound);
+    const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(password, salt);
+    const full_name = `${first_name} ${middle_name ? middle_name + ' ' : ''}${last_name}`;
 
-    // 4. Enter the new user inside our database
+    // --- DATE CONSTRUCTION LOGIC ---
+    const monthMap = {
+        "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06",
+        "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
+    };
+    // Default to 1st of that month
+    const joining_date = `${joining_year}-${monthMap[joining_month]}-01`;
+
     const newUser = await pool.query(
-      "INSERT INTO users (player_id, password_hash, full_name, branch, year_of_study, joining_year) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [player_id, bcryptPassword, full_name, branch, year_of_study, joining_year]
+      `INSERT INTO users (
+          player_id, password_hash, full_name, 
+          first_name, middle_name, last_name,
+          branch, year_of_study, 
+          joining_month, joining_year, birth_date,
+          joining_date, status  -- <--- Added joining_date and explicit status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending') RETURNING *`,
+      [
+          player_id, bcryptPassword, full_name,
+          first_name, middle_name, last_name,
+          branch, year_of_study,
+          joining_month, joining_year, birth_date,
+          joining_date
+      ]
     );
 
-    // 5. Generate the JWT Token
     const token = jwt.sign({ user: newUser.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-    // 6. Respond with the token
     res.json({ token, user: newUser.rows[0] });
 
   } catch (err) {

@@ -14,6 +14,7 @@ app.use("/api/players", require("./routes/players"));
 app.use("/api/matches", require("./routes/matches"));
 app.use("/api/finance", require("./routes/finance"));
 app.use("/api/attendance", require("./routes/attendance"));
+app.use("/api/team", require("./routes/team"));
 // 1. Test Route (To check if server is running)
 app.get("/", (req, res) => {
   res.send("Server is running correctly!");
@@ -31,9 +32,10 @@ app.get("/test-db", async (req, res) => {
 });
 
 // ------------------------------------------ //
-
+const startCronJobs = require("./cronJobs");
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server has started on port ${PORT}`);
+  startCronJobs();
 });

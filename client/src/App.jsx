@@ -21,6 +21,8 @@ import Roster from "./pages/Roster";
 import AdminPlayers from "./pages/admin/AdminPlayers";
 import PlayerCareerStats from "./pages/PlayerCareerStats";
 import MatchDetails from "./pages/MatchDetails";
+import TeamStats from "./pages/TeamStats";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -72,6 +74,10 @@ function App() {
           <Route 
             path="/register" 
             element={!isAuthenticated ? <Register setAuth={setAuth} /> : <Navigate to="/dashboard" />} 
+          />
+          <Route 
+            path="/" 
+            element={!isAuthenticated ? <LandingPage /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />} 
           />
           
           {/* PLAYER ROUTE */}
@@ -139,9 +145,13 @@ function App() {
             path="/match/:id" 
             element={isAuthenticated ? <MatchDetails /> : <Navigate to="/login" />} 
           />
+          <Route 
+            path="/team-stats" 
+            element={isAuthenticated ? <TeamStats /> : <Navigate to="/login" />} 
+          />
           
           {/* Default redirect */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <ToastContainer />
       </div>
