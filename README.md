@@ -38,6 +38,31 @@ A high-performance, full-stack **PERN** application (PostgreSQL, Express, React,
 * **🔒 Privacy:** View teammate stats without seeing sensitive contact/financial info.
 
 ---
+## 📸 Screenshots
+<div align="center">
+  <h3>Admin Dashboard</h3>
+  <img src="./screenshots/adminDashboard.png" width="700" alt="Admin Dashboard">
+  <br><br>
+  <h3>Player Stats</h3>
+  <img src="./screenshots/playerDetailStats.png" width="700" alt="Player Stats">
+  <br><br>
+  <h3>Full Scorecard</h3>
+  <img src="./screenshots/playerFullScoreboard.png" width="700" alt="Detail Scorecard">
+  <br><br>
+  <h3>Full Scorecard</h3>
+  <img src="./screenshots/playerFullScoreboard.png" width="700" alt="Detail Scorecard">
+  <br><br>
+  <h3>Admin Finance</h3>
+  <img src="./screenshots/adminFinanceVault.png" width="700" alt="Admin Finance">
+  <br><br>
+  <h3>Player Finance</h3>
+  <img src="./screenshots/playerFinances.png" width="700" alt="Player Finances">
+  <br><br>
+  <h3>Team HQ</h3>
+  <img src="./screenshots/playerTeamHQ.png" width="700" alt="Team Headquarters">
+</div>
+
+---
 
 ## 🛠️ Tech Stack
 
