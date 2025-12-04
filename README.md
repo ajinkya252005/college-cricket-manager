@@ -49,9 +49,6 @@ A high-performance, full-stack **PERN** application (PostgreSQL, Express, React,
   <h3>Full Scorecard</h3>
   <img src="./screenshots/playerFullScoreboard.png" width="700" alt="Detail Scorecard">
   <br><br>
-  <h3>Full Scorecard</h3>
-  <img src="./screenshots/playerFullScoreboard.png" width="700" alt="Detail Scorecard">
-  <br><br>
   <h3>Admin Finance</h3>
   <img src="./screenshots/adminFinanceVault.png" width="700" alt="Admin Finance">
   <br><br>
