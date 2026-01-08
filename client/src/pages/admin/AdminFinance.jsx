@@ -32,14 +32,12 @@ const AdminFinance = () => {
 
   const fetchData = async () => {
     try {
-      const recRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/all");
       const playRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players");
       const sessRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/pending-practice");
       const fundRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/funds");
       const ledg = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/ledger");
       const tourRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/pending-tournaments");
 
-      if (recRes.ok) {} // (Unused here but good for debugging)
       if (playRes.ok) setPlayers(await playRes.json());
       
       if (sessRes.ok) {
