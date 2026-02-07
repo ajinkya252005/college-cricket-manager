@@ -24,24 +24,29 @@ const AdminMatches = () => {
       console.error(err.message);
     }
   };
+  // ... existing deleteMatch function or place this inside AdminMatches component ...
   const deleteMatch = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this match? This will also unlock the squad if no other matches exist.")) {
-      return;
-    }
-    try {
-      const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, {
-        method: "DELETE",
-        headers: { token: localStorage.token }
-      });
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this match? This will remove all associated data and revert player stats."
+    );
 
-      if (response.ok) {
-        setMatches(matches.filter(match => match.match_id !== id));
-        toast.success("Match deleted successfully");
-      } else {
-        toast.error("Failed to delete match");
+    if (confirmDelete) {
+      try {
+        const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, {
+          method: "DELETE",
+          headers: { token: localStorage.getItem("token") },
+        });
+
+        if (response.ok) {
+          setMatches(matches.filter((match) => match.match_id !== id));
+          toast.success("Match Deleted Successfully");
+        } else {
+          toast.error("Failed to delete match");
+        }
+      } catch (err) {
+        console.error(err.message);
+        toast.error("Error deleting match");
       }
-    } catch (err) {
-      console.error(err.message);
     }
   };
 
@@ -237,10 +242,10 @@ const AdminMatches = () => {
                         <span className="bg-green-500/20 rounded-full w-6 h-6 flex items-center justify-center text-xs">&rarr;</span>
                       </Link>
                       <button
-                        onClick={() => deleteMatch(match.match_id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                        onClick={() => deleteMatch(m.match_id)}
+                        className="btn btn-danger btn-sm"
                       >
-                        Delete
+                        <i className="fas fa-trash"></i> Delete
                       </button>
                     </div>
                   </div>
@@ -258,3 +263,4 @@ const AdminMatches = () => {
 };
 
 export default AdminMatches;
+//https://cricket-api-ll8u.onrender.com/api/matches/${id}

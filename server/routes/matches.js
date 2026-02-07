@@ -271,4 +271,104 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
+// ... existing code ...
+
+// DELETE A MATCH
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Start Transaction
+    await pool.query("BEGIN");
+
+    // 1. Get the scorecard to revert player stats
+    const matchResult = await pool.query(
+      "SELECT scorecard_data FROM matches WHERE match_id = $1",
+      [id]
+    );
+
+    if (matchResult.rows.length > 0) {
+      const scorecard = matchResult.rows[0].scorecard;
+
+      // Check if scorecard and our_team exist
+      if (scorecard && Array.isArray(scorecard.our_team)) {
+        for (const player of scorecard.our_team) {
+          // Only revert stats if the player actually played
+          if (player.played && player.user_id) {
+            const {
+              user_id,
+              runs = 0,
+              balls = 0,
+              fours = 0,
+              sixes = 0,
+              wickets = 0,
+              overs = 0,
+              runs_given = 0,
+              maidens = 0,
+            } = player;
+
+            // Decrement the stats accumulated in this match from the user's total
+            await pool.query(
+              `UPDATE users SET 
+                total_matches = total_matches - 1,
+                total_runs = total_runs - $1,
+                total_balls_faced = total_balls_faced - $2,
+                total_fours = total_fours - $3,
+                total_sixes = total_sixes - $4,
+                total_wickets = total_wickets - $5,
+                total_overs_bowled = total_overs_bowled - $6,
+                total_runs_conceded = total_runs_conceded - $7,
+                total_maidens = total_maidens - $8
+               WHERE user_id = $9`,
+              [
+                runs,
+                balls,
+                fours,
+                sixes,
+                wickets,
+                overs,
+                runs_given,
+                maidens,
+                user_id,
+              ]
+            );
+          }
+        }
+      }
+    }
+
+    // 2. Delete from associated tables
+    await pool.query("DELETE FROM attendance_events WHERE related_match_id = $1", [id]);
+    await pool.query("DELETE FROM match_participation WHERE match_id = $1", [id]);
+    await pool.query("DELETE FROM opponent_participation WHERE match_id = $1", [id]);
+
+    // 3. Delete the match itself
+    const deleteMatch = await pool.query(
+      "DELETE FROM matches WHERE match_id = $1 RETURNING *",
+      [id]
+    );
+
+    // Commit Transaction
+    await pool.query("COMMIT");
+
+    if (deleteMatch.rows.length === 0) {
+      return res.status(404).json("Match not found");
+    }
+
+    res.json("Match was deleted");
+  } catch (err) {
+    // Rollback changes on error
+    await pool.query("ROLLBACK");
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 module.exports = router;
+
+module.exports = router;
+
+// matches match_id, scorecard (scorecard data is stored in json format) (main table)
+// attendance_events related_match_id
+// match_participation match_id
+// opponent_participation match_id
