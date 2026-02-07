@@ -39,3 +39,7 @@ app.listen(PORT, () => {
   console.log(`Server has started on port ${PORT}`);
   startCronJobs();
 });
+// Simple health check route for Uptime Robot
+app.get("/health", (req, res) => {
+  res.status(200).send("Server is awake");
+});
