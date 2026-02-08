@@ -124,25 +124,41 @@ router.post("/team-login", async (req, res) => {
 // VERIFY ROUTE (Get User Data)
 router.get("/verify", async (req, res) => {
   try {
-    // 1. Get the token from the header
     const token = req.header("token");
 
     if (!token) {
       return res.status(403).json("Not Authorized");
     }
 
-    // 2. Verify the token
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, secret);
 
-    // 3. If valid, return the user info
-    const user = await pool.query(
-  "SELECT * FROM users WHERE user_id = $1", 
-  [payload.user]
-);
+    // 1. CHECK IF THIS IS THE TEAM ADMIN
+    if (payload.role === "team_admin") {
+      // Return a mock user object for the frontend to use
+      return res.json({ 
+        user_name: "Team Admin", 
+        role: "team_admin",
+        is_admin: true 
+      });
+    }
+
+    // 2. OTHERWISE, CHECK DATABASE FOR REGULAR USER
+    // Ensure payload.user exists before querying
+    if (!payload.user) {
+        return res.status(403).json("Invalid Token Structure");
+    }
+
+    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
+      payload.user,
+    ]);
+
+    if (user.rows.length === 0) {
+        return res.status(403).json("User not found");
+    }
 
     res.json(user.rows[0]);
   } catch (err) {
-    console.error(err.message);
+    console.error("Verify Error:", err.message);
     res.status(403).json("Not Authorized");
   }
 });
