@@ -97,6 +97,30 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/team-login", async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    // Hardcoded Password Check as requested
+    if (password !== "pvg2026") {
+      return res.status(401).json("Invalid Password");
+    }
+
+    // Issue a special token for the team admin
+    // We use a role payload to distinguish this from a normal user
+    const token = jwt.sign(
+      { role: "team_admin" }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: "1h" }
+    );
+
+    res.json({ token, role: "team" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 // VERIFY ROUTE (Get User Data)
 router.get("/verify", async (req, res) => {
   try {

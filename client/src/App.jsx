@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard"; 
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminTournaments from "./pages/admin/AdminTournaments";
 import AdminSquad from "./pages/admin/AdminSquad";
 import AdminMatches from "./pages/admin/AdminMatches";
@@ -23,6 +23,7 @@ import PlayerCareerStats from "./pages/PlayerCareerStats";
 import MatchDetails from "./pages/MatchDetails";
 import TeamStats from "./pages/TeamStats";
 import LandingPage from "./pages/LandingPage";
+import TeamAnalytics from "./pages/TeamAnalytics";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,95 +62,105 @@ function App() {
   }, []);
 
   // Show nothing while checking (prevents flickering)
-  if (loading) return null; 
+  if (loading) return null;
 
   return (
     <Router>
       <div className="container">
         <Routes>
-          <Route 
-            path="/login" 
-            element={!isAuthenticated ? <Login setAuth={setAuth} setUserRole={setUserRole} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />} 
+          <Route
+            path="/login"
+            element={!isAuthenticated ? <Login setAuth={setAuth} setUserRole={setUserRole} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />}
           />
-          <Route 
-            path="/register" 
-            element={!isAuthenticated ? <Register setAuth={setAuth} /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/register"
+            element={!isAuthenticated ? <Register setAuth={setAuth} /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/" 
-            element={!isAuthenticated ? <LandingPage /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />} 
+          <Route
+            path="/"
+            element={!isAuthenticated ? <LandingPage /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />}
           />
-          
+
           {/* PLAYER ROUTE */}
-          <Route 
-            path="/dashboard" 
-            element={isAuthenticated ? <Dashboard setAuth={setAuth} /> : <Navigate to="/login" />} 
+          <Route
+            path="/dashboard"
+            element={isAuthenticated ? <Dashboard setAuth={setAuth} /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/my-stats" 
-            element={isAuthenticated ? <PlayerStats /> : <Navigate to="/login" />} 
+          <Route
+            path="/my-stats"
+            element={isAuthenticated ? <PlayerStats /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/my-finance" 
-            element={isAuthenticated ? <PlayerFinance /> : <Navigate to="/login" />} 
+          <Route
+            path="/my-finance"
+            element={isAuthenticated ? <PlayerFinance /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/my-attendance" 
-            element={isAuthenticated ? <PlayerAttendance /> : <Navigate to="/login" />} 
+          <Route
+            path="/my-attendance"
+            element={isAuthenticated ? <PlayerAttendance /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/career-stats" 
-            element={isAuthenticated ? <PlayerCareerStats /> : <Navigate to="/login" />} 
+          <Route
+            path="/career-stats"
+            element={isAuthenticated ? <PlayerCareerStats /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/team/analytics"
+            element={
+              isAuthenticated ? (
+                <TeamAnalytics setAuth={setAuth} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
 
           {/* ADMIN ROUTE (Protected) */}
-          <Route 
-            path="/admin-dashboard" 
-            element={isAuthenticated && userRole === "admin" ? <AdminDashboard setAuth={setAuth} /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin-dashboard"
+            element={isAuthenticated && userRole === "admin" ? <AdminDashboard setAuth={setAuth} /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/tournaments" 
-            element={isAuthenticated && userRole === "admin" ? <AdminTournaments /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/tournaments"
+            element={isAuthenticated && userRole === "admin" ? <AdminTournaments /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/tournaments/:id/squad" 
-            element={isAuthenticated && userRole === "admin" ? <AdminSquad /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/tournaments/:id/squad"
+            element={isAuthenticated && userRole === "admin" ? <AdminSquad /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/matches" 
-            element={isAuthenticated && userRole === "admin" ? <AdminMatches /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/matches"
+            element={isAuthenticated && userRole === "admin" ? <AdminMatches /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/matches/:id/scorecard" 
-            element={isAuthenticated && userRole === "admin" ? <AdminScorecard /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/matches/:id/scorecard"
+            element={isAuthenticated && userRole === "admin" ? <AdminScorecard /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/finance" 
-            element={isAuthenticated && userRole === "admin" ? <AdminFinance /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/finance"
+            element={isAuthenticated && userRole === "admin" ? <AdminFinance /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/attendance" 
-            element={isAuthenticated && userRole === "admin" ? <AdminAttendance /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/attendance"
+            element={isAuthenticated && userRole === "admin" ? <AdminAttendance /> : <Navigate to="/dashboard" />}
           />
-          <Route 
-            path="/admin/players" 
-            element={isAuthenticated && userRole === "admin" ? <AdminPlayers /> : <Navigate to="/dashboard" />} 
+          <Route
+            path="/admin/players"
+            element={isAuthenticated && userRole === "admin" ? <AdminPlayers /> : <Navigate to="/dashboard" />}
           />
 
           {/* TEAM ROUTE */}
-          <Route 
-            path="/roster" 
-            element={isAuthenticated ? <Roster /> : <Navigate to="/login" />} 
+          <Route
+            path="/roster"
+            element={isAuthenticated ? <Roster /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/match/:id" 
-            element={isAuthenticated ? <MatchDetails /> : <Navigate to="/login" />} 
+          <Route
+            path="/match/:id"
+            element={isAuthenticated ? <MatchDetails /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/team-stats" 
-            element={isAuthenticated ? <TeamStats /> : <Navigate to="/login" />} 
+          <Route
+            path="/team-stats"
+            element={isAuthenticated ? <TeamStats /> : <Navigate to="/login" />}
           />
-          
+
           {/* Default redirect */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
