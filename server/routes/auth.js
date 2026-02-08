@@ -109,7 +109,7 @@ router.post("/team-login", async (req, res) => {
     // Issue a special token for the team admin
     // We use a role payload to distinguish this from a normal user
     const token = jwt.sign(
-      { role: "team_admin" }, 
+      { role: "admin" }, 
       process.env.JWT_SECRET, 
       { expiresIn: "1h" }
     );
@@ -133,11 +133,11 @@ router.get("/verify", async (req, res) => {
     const payload = jwt.verify(token, secret);
 
     // 1. CHECK IF THIS IS THE TEAM ADMIN
-    if (payload.role === "team_admin") {
+    if (payload.role === "admin") {
       // Return a mock user object for the frontend to use
       return res.json({ 
-        user_name: "Team Admin", 
-        role: "team_admin",
+        user_name: "aj2005", 
+        role: "admin",
         is_admin: true 
       });
     }
