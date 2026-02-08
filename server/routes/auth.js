@@ -99,39 +99,40 @@ router.post("/login", async (req, res) => {
 
 router.post("/team-login", async (req, res) => {
   try {
-    // 1. Destructure user_id and password
-    const { user_id, password } = req.body;
+    const { player_id, password } = req.body;
 
-    // 2. Check if user exists (using the same users table as players/admins)
-    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
-      user_id
-    ]);
+    const user = await pool.query(
+      "SELECT * FROM users WHERE player_id = $1",
+      [player_id]
+    );
 
     if (user.rows.length === 0) {
-      return res.status(401).json("Password or User ID is incorrect");
+      return res.status(401).json("Password or Player ID is incorrect");
     }
 
-    // 3. Verify the password
     const validPassword = await bcrypt.compare(
       password,
-      user.rows[0].user_password
+      user.rows[0].password_hash
     );
 
     if (!validPassword) {
-      return res.status(401).json("Password or User ID is incorrect");
+      return res.status(401).json("Password or Player ID is incorrect");
     }
 
-    // 4. Generate and return the Token
-    const token = jwtGenerator(user.rows[0].user_id);
+    const token = jwt.sign(
+      { user: user.rows[0].user_id, role: user.rows[0].user_role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // Optional: Return user role info if needed for frontend redirection logic
-    res.json({ token, user: { role: user.rows[0].user_role } });
+    res.json({ token, user: user.rows[0] });
 
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 });
+
 
 // VERIFY ROUTE (Get User Data)
 router.get("/verify", async (req, res) => {
@@ -142,7 +143,7 @@ router.get("/verify", async (req, res) => {
       return res.status(403).json("Not Authorized");
     }
 
-    const payload = jwt.verify(token, secret);
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
 
     // 1. CHECK IF THIS IS THE TEAM ADMIN
     if (payload.role === "admin") {
