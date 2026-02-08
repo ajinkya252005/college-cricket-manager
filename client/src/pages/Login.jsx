@@ -8,7 +8,6 @@ const Login = ({ setAuth, setUserRole }) => {
     password: "",
   });
   
-  // loginType can now be 'player', 'admin', or 'team'
   const [loginType, setLoginType] = useState("player"); 
   const [loading, setLoading] = useState(false);
 
@@ -23,13 +22,14 @@ const Login = ({ setAuth, setUserRole }) => {
     setLoading(true);
     
     try {
-      // 1. Configure Endpoint & Body based on Login Type
       let url = "";
       let body = {};
 
+      // 1. Configure Endpoint & Body
       if (loginType === "team") {
         url = "https://cricket-api-ll8u.onrender.com/api/auth/team-login"; 
-        body = { password }; // Team only needs password
+        // Now sending user_id (from player_id state) and password
+        body = { user_id: player_id, password }; 
       } else {
         url = "https://cricket-api-ll8u.onrender.com/api/auth/login"; 
         body = { player_id, password };
@@ -49,19 +49,19 @@ const Login = ({ setAuth, setUserRole }) => {
 
         // 2. Handle Redirects & Roles
         if (loginType === "team") {
-           setUserRole("team"); // New role
+           setUserRole("team"); 
            toast.success("Team Access Granted!");
            navigate("/team/analytics");
         } 
         else if (loginType === "admin") {
-           if (parseRes.user.role !== "admin") {
+           if (parseRes.user && parseRes.user.role !== "admin") {
              toast.error("Access Denied: You are not an Admin!");
              setLoading(false); 
              return; 
            }
            setUserRole("admin");
            toast.success("Welcome Admin!");
-           // navigate("/admin/dashboard"); // Uncomment if you have a specific admin route
+           // navigate("/admin/dashboard");
         } 
         else {
            setUserRole("player");
@@ -101,19 +101,21 @@ const Login = ({ setAuth, setUserRole }) => {
         {/* TABS */}
         <div className="flex bg-gray-900/50 p-1 rounded-xl mb-8 border border-gray-700">
           <button 
+            type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "player" ? "bg-blue-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("player")}
           >
             Player
           </button>
           <button 
+            type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "admin" ? "bg-purple-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("admin")}
           >
             Admin
           </button>
-          {/* NEW TEAM TAB */}
           <button 
+            type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "team" ? "bg-green-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("team")}
           >
@@ -123,33 +125,31 @@ const Login = ({ setAuth, setUserRole }) => {
 
         <form onSubmit={onSubmitForm} className="space-y-5">
           
-          {/* Hide ID Input if Team Login is selected */}
-          {loginType !== "team" && (
-            <div className="animate-fade-in-down">
-              <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">
-                {loginType === "admin" ? "Admin ID" : "Player ID"}
-              </label>
-              <input
-                type="text"
-                name="player_id"
-                className="w-full bg-gray-900/80 border border-gray-700 text-white rounded-xl p-4 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition outline-none placeholder-gray-600"
-                placeholder="e.g. 12345678"
-                value={player_id}
-                onChange={onChange}
-                required={loginType !== "team"}
-              />
-            </div>
-          )}
+          {/* User ID Input - Visible for ALL types now */}
+          <div className="animate-fade-in-down">
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">
+              {loginType === "admin" ? "Admin ID" : "User ID"}
+            </label>
+            <input
+              type="text"
+              name="player_id"
+              className="w-full bg-gray-900/80 border border-gray-700 text-white rounded-xl p-4 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition outline-none placeholder-gray-600"
+              placeholder="e.g. 12345678"
+              value={player_id}
+              onChange={onChange}
+              required
+            />
+          </div>
           
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">
-              {loginType === "team" ? "Team Password" : "Password"}
+              Password
             </label>
             <input
               type="password"
               name="password"
               className="w-full bg-gray-900/80 border border-gray-700 text-white rounded-xl p-4 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition outline-none placeholder-gray-600"
-              placeholder={loginType === "team" ? "Enter Team Code" : "••••••••"}
+              placeholder="••••••••"
               value={password}
               onChange={onChange}
               required

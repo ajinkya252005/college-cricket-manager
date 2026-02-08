@@ -99,22 +99,34 @@ router.post("/login", async (req, res) => {
 
 router.post("/team-login", async (req, res) => {
   try {
-    const { password } = req.body;
+    // 1. Destructure user_id and password
+    const { user_id, password } = req.body;
 
-    // Hardcoded Password Check as requested
-    if (password !== "pvg2026") {
-      return res.status(401).json("Invalid Password");
+    // 2. Check if user exists (using the same users table as players/admins)
+    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
+      user_id
+    ]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json("Password or User ID is incorrect");
     }
 
-    // Issue a special token for the team admin
-    // We use a role payload to distinguish this from a normal user
-    const token = jwt.sign(
-      { role: "admin" }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: "1h" }
+    // 3. Verify the password
+    const validPassword = await bcrypt.compare(
+      password,
+      user.rows[0].user_password
     );
 
-    res.json({ token, role: "team" });
+    if (!validPassword) {
+      return res.status(401).json("Password or User ID is incorrect");
+    }
+
+    // 4. Generate and return the Token
+    const token = jwtGenerator(user.rows[0].user_id);
+
+    // Optional: Return user role info if needed for frontend redirection logic
+    res.json({ token, user: { role: user.rows[0].user_role } });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
