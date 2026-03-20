@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../../config";
 
 const AdminAttendance = () => {
   const [view, setView] = useState("list"); 

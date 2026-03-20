@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const TeamStats = () => {
   const [headline, setHeadline] = useState(null);
@@ -11,9 +12,9 @@ const TeamStats = () => {
     const getData = async () => {
       try {
         const [statsRes, leadersRes, tournRes] = await Promise.all([
-            fetch("${API_BASE_URL}/api/team/stats"),
-            fetch("${API_BASE_URL}/api/team/leaderboard"),
-            fetch("${API_BASE_URL}/api/team/tournaments")
+            fetch(`${API_BASE_URL}/api/team/stats`),
+            fetch(`${API_BASE_URL}/api/team/leaderboard`),
+            fetch(`${API_BASE_URL}/api/team/tournaments`)
         ]);
 
         setHeadline(await statsRes.json());

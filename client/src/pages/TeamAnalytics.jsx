@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const TeamAnalytics = ({ setAuth }) => {
   const [players, setPlayers] = useState([]);
@@ -8,7 +9,7 @@ const TeamAnalytics = ({ setAuth }) => {
 
   const getAnalytics = async () => {
     try {
-      const response = await fetch("${API_BASE_URL}/api/team/analytics", {
+      const response = await fetch(`${API_BASE_URL}/api/team/analytics`, {
         method: "GET",
         headers: { token: localStorage.getItem("token") },
       });

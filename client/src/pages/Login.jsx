@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../config";
 
 const Login = ({ setAuth, setUserRole }) => {
   const [inputs, setInputs] = useState({
@@ -27,11 +28,11 @@ const Login = ({ setAuth, setUserRole }) => {
 
       // 1. Configure Endpoint & Body
       if (loginType === "team") {
-        url = "${API_BASE_URL}/api/auth/team-login"; 
+        url = `${API_BASE_URL}/api/auth/team-login`; 
         // Now sending user_id (from player_id state) and password
         body = { user_id: player_id, password }; 
       } else {
-        url = "${API_BASE_URL}/api/auth/login"; 
+        url = `${API_BASE_URL}/api/auth/login`; 
         body = { player_id, password };
       }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 const AdminPlayers = () => {
   const [pending, setPending] = useState([]);
@@ -13,9 +14,9 @@ const AdminPlayers = () => {
 
   const fetchData = async () => {
     try {
-      const pendingRes = await fetch("${API_BASE_URL}/api/players/pending");
-      const activeRes = await fetch("${API_BASE_URL}/api/players");
-      const alumniRes = await fetch("${API_BASE_URL}/api/players/alumni");
+      const pendingRes = await fetch(`${API_BASE_URL}/api/players/pending`);
+      const activeRes = await fetch(`${API_BASE_URL}/api/players`);
+      const alumniRes = await fetch(`${API_BASE_URL}/api/players/alumni`);
 
       setPending(await pendingRes.json());
       setActive(await activeRes.json());
@@ -94,7 +95,7 @@ const AdminPlayers = () => {
   const submitCreate = async (e) => {
       e.preventDefault();
       try {
-          const res = await fetch("${API_BASE_URL}/api/players/add", {
+          const res = await fetch(`${API_BASE_URL}/api/players/add`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData)

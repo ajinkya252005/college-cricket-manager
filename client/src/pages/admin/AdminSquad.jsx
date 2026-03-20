@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 const AdminSquad = () => {
   const { id } = useParams(); // Tournament ID
@@ -12,7 +13,7 @@ const AdminSquad = () => {
   const fetchData = async () => {
     try {
       // 1. Get all players
-      const playersRes = await fetch("${API_BASE_URL}/api/players");
+      const playersRes = await fetch(`${API_BASE_URL}/api/players`);
       const playersData = await playersRes.json();
 
       // 2. Get current squad
@@ -22,7 +23,7 @@ const AdminSquad = () => {
       // 3. CHECK IF LOCKED (Are there matches?)
       // We reuse the matches API. Ideally we'd have a specific endpoint, 
       // but filtering the full match list works fine for now.
-      const matchRes = await fetch("${API_BASE_URL}/api/matches");
+      const matchRes = await fetch(`${API_BASE_URL}/api/matches`);
       const matchData = await matchRes.json();
       // Check if any match belongs to THIS tournament
       const hasMatches = matchData.some(m => m.tournament_id === parseInt(id));

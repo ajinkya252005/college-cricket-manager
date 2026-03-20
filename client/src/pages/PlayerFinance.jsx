@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const PlayerFinance = () => {
   const [categories, setCategories] = useState({ practice: [], tournament: [], other: [] });
@@ -9,7 +10,7 @@ const PlayerFinance = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const verifyRes = await fetch("${API_BASE_URL}/api/auth/verify", {
+        const verifyRes = await fetch(`${API_BASE_URL}/api/auth/verify`, {
             method: "GET",
             headers: { token: localStorage.getItem("token") }
         });

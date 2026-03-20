@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Dashboard = ({ setAuth }) => {
   const [name, setName] = useState("");
@@ -12,7 +13,7 @@ const Dashboard = ({ setAuth }) => {
 
   const getProfile = async () => {
     try {
-      const response = await fetch("${API_BASE_URL}/api/auth/verify", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
         method: "GET",
         headers: { token: localStorage.getItem("token") },
       });
