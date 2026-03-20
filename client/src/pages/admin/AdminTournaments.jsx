@@ -13,7 +13,7 @@ const AdminTournaments = () => {
   // Fetch existing tournaments
   const getTournaments = async () => {
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments");
+      const response = await fetch("${API_BASE_URL}/api/tournaments");
       const jsonData = await response.json();
       setTournaments(jsonData);
     } catch (err) {
@@ -31,7 +31,7 @@ const AdminTournaments = () => {
   const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments", {
+      const response = await fetch("${API_BASE_URL}/api/tournaments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -11,9 +11,9 @@ const TeamStats = () => {
     const getData = async () => {
       try {
         const [statsRes, leadersRes, tournRes] = await Promise.all([
-            fetch("https://cricket-api-ll8u.onrender.com/api/team/stats"),
-            fetch("https://cricket-api-ll8u.onrender.com/api/team/leaderboard"),
-            fetch("https://cricket-api-ll8u.onrender.com/api/team/tournaments")
+            fetch("${API_BASE_URL}/api/team/stats"),
+            fetch("${API_BASE_URL}/api/team/leaderboard"),
+            fetch("${API_BASE_URL}/api/team/tournaments")
         ]);
 
         setHeadline(await statsRes.json());

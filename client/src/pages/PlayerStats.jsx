@@ -8,14 +8,14 @@ const PlayerStats = () => {
   useEffect(() => {
     const getHistory = async () => {
       try {
-        const verifyRes = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
+        const verifyRes = await fetch("${API_BASE_URL}/api/auth/verify", {
             method: "GET",
             headers: { token: localStorage.getItem("token") }
         });
         const user = await verifyRes.json();
 
         if (user.user_id) { 
-            const historyRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/user/${user.user_id}`);
+            const historyRes = await fetch(`${API_BASE_URL}/api/matches/user/${user.user_id}`);
             const historyData = await historyRes.json();
             setHistory(historyData);
         }

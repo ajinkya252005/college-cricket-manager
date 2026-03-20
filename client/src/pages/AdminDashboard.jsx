@@ -17,10 +17,10 @@ const AdminDashboard = ({ setAuth }) => {
       try {
         // Parallel fetching for speed
         const [pendingRes, playersRes, matchesRes, fundsRes] = await Promise.all([
-            fetch("https://cricket-api-ll8u.onrender.com/api/players/pending"),
-            fetch("https://cricket-api-ll8u.onrender.com/api/players"),
-            fetch("https://cricket-api-ll8u.onrender.com/api/matches"),
-            fetch("https://cricket-api-ll8u.onrender.com/api/finance/funds")
+            fetch("${API_BASE_URL}/api/players/pending"),
+            fetch("${API_BASE_URL}/api/players"),
+            fetch("${API_BASE_URL}/api/matches"),
+            fetch("${API_BASE_URL}/api/finance/funds")
         ]);
 
         const pending = await pendingRes.json();

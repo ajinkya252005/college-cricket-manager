@@ -24,7 +24,7 @@ const Register = () => {
     setLoading(true);
     try {
       const body = { ...inputs, year_of_study: parseInt(inputs.year_of_study), joining_year: parseInt(inputs.joining_year) };
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/register", {
+      const response = await fetch("${API_BASE_URL}/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

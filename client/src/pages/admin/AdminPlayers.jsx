@@ -13,9 +13,9 @@ const AdminPlayers = () => {
 
   const fetchData = async () => {
     try {
-      const pendingRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players/pending");
-      const activeRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players");
-      const alumniRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players/alumni");
+      const pendingRes = await fetch("${API_BASE_URL}/api/players/pending");
+      const activeRes = await fetch("${API_BASE_URL}/api/players");
+      const alumniRes = await fetch("${API_BASE_URL}/api/players/alumni");
 
       setPending(await pendingRes.json());
       setActive(await activeRes.json());
@@ -27,34 +27,34 @@ const AdminPlayers = () => {
 
   // --- ACTIONS ---
   const handleApprove = async (id) => {
-    await fetch(`https://cricket-api-ll8u.onrender.com/api/players/approve/${id}`, { method: "PUT" });
+    await fetch(`${API_BASE_URL}/api/players/approve/${id}`, { method: "PUT" });
     toast.success("Player Approved!"); fetchData();
   };
 
   const handleReject = async (id) => {
     if(window.confirm("Reject request?")) {
-        await fetch(`https://cricket-api-ll8u.onrender.com/api/players/reject/${id}`, { method: "DELETE" });
+        await fetch(`${API_BASE_URL}/api/players/reject/${id}`, { method: "DELETE" });
         toast.error("Rejected"); fetchData();
     }
   };
 
   const handleArchive = async (id) => {
     if(window.confirm("Move to Alumni?")) {
-        await fetch(`https://cricket-api-ll8u.onrender.com/api/players/archive/${id}`, { method: "PUT" });
+        await fetch(`${API_BASE_URL}/api/players/archive/${id}`, { method: "PUT" });
         toast.info("Archived"); fetchData();
     }
   };
 
   const handleRestore = async (id) => {
       if(window.confirm("Restore this player to Active Team?")) {
-        await fetch(`https://cricket-api-ll8u.onrender.com/api/players/approve/${id}`, { method: "PUT" }); 
+        await fetch(`${API_BASE_URL}/api/players/approve/${id}`, { method: "PUT" }); 
         toast.success("Player Restored!"); fetchData();
       }
   };
 
   // --- MODAL LOGIC ---
   const openEdit = async (id) => {
-      const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/players/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/players/${id}`);
       const data = await res.json();
       setEditPlayer(data);
       setFormData({
@@ -71,7 +71,7 @@ const AdminPlayers = () => {
   const submitEdit = async (e) => {
       e.preventDefault();
       try {
-          const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/players/update/${editPlayer.user_id}`, {
+          const res = await fetch(`${API_BASE_URL}/api/players/update/${editPlayer.user_id}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData)
@@ -94,7 +94,7 @@ const AdminPlayers = () => {
   const submitCreate = async (e) => {
       e.preventDefault();
       try {
-          const res = await fetch("https://cricket-api-ll8u.onrender.com/api/players/add", {
+          const res = await fetch("${API_BASE_URL}/api/players/add", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(formData)

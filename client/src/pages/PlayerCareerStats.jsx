@@ -12,14 +12,14 @@ const PlayerCareerStats = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const verifyRes = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
+        const verifyRes = await fetch("${API_BASE_URL}/api/auth/verify", {
             method: "GET",
             headers: { token: localStorage.getItem("token") }
         });
         const user = await verifyRes.json();
 
         if(user.user_id) {
-            const statsRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/players/stats/rich/${user.user_id}`);
+            const statsRes = await fetch(`${API_BASE_URL}/api/players/stats/rich/${user.user_id}`);
             const statsData = await statsRes.json();
             setData(statsData);
         }

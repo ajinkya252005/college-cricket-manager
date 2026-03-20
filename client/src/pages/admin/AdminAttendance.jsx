@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../config";
 
 const AdminAttendance = () => {
   const [view, setView] = useState("list"); 
@@ -22,7 +23,7 @@ const AdminAttendance = () => {
   // --- FETCH DATA ---
   const fetchHistory = async () => {
     try {
-        const res = await fetch("https://cricket-api-ll8u.onrender.com/api/attendance/events");
+        const res = await fetch(`${API_BASE_URL}/api/attendance/events`);
         setHistory(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -30,7 +31,7 @@ const AdminAttendance = () => {
   const fetchPlayers = async (dateParam) => {
     try {
         const targetDate = dateParam || new Date().toISOString().split('T')[0];
-        const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/players/active-on-date/${targetDate}`);
+        const res = await fetch(`${API_BASE_URL}/api/players/active-on-date/${targetDate}`);
         setPlayers(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -43,7 +44,7 @@ const AdminAttendance = () => {
   // --- HANDLERS ---
   const handleEdit = async (eventId) => {
     try {
-        const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/attendance/event/${eventId}`);
+        const res = await fetch(`${API_BASE_URL}/api/attendance/event/${eventId}`);
         const data = await res.json();
         const eventDate = new Date(data.event.date).toISOString().split('T')[0];
         
@@ -88,7 +89,7 @@ const AdminAttendance = () => {
 
   const onSubmit = async () => {
     if(selectedIds.length === 0) return toast.warning("Select at least one player!");
-    const endpoint = isEditing ? `https://cricket-api-ll8u.onrender.com/api/attendance/update/${editId}` : "https://cricket-api-ll8u.onrender.com/api/attendance/create";
+    const endpoint = isEditing ? `${API_BASE_URL}/api/attendance/update/${editId}` : `${API_BASE_URL}/api/attendance/create`;
     const method = isEditing ? "PUT" : "POST";
 
     try {

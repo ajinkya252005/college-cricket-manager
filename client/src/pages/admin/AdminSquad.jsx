@@ -12,17 +12,17 @@ const AdminSquad = () => {
   const fetchData = async () => {
     try {
       // 1. Get all players
-      const playersRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players");
+      const playersRes = await fetch("${API_BASE_URL}/api/players");
       const playersData = await playersRes.json();
 
       // 2. Get current squad
-      const squadRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/tournaments/${id}/squad`);
+      const squadRes = await fetch(`${API_BASE_URL}/api/tournaments/${id}/squad`);
       const squadData = await squadRes.json();
 
       // 3. CHECK IF LOCKED (Are there matches?)
       // We reuse the matches API. Ideally we'd have a specific endpoint, 
       // but filtering the full match list works fine for now.
-      const matchRes = await fetch("https://cricket-api-ll8u.onrender.com/api/matches");
+      const matchRes = await fetch("${API_BASE_URL}/api/matches");
       const matchData = await matchRes.json();
       // Check if any match belongs to THIS tournament
       const hasMatches = matchData.some(m => m.tournament_id === parseInt(id));
@@ -42,7 +42,7 @@ const AdminSquad = () => {
   // Add to Squad
   const addToSquad = async (userId) => {
     try {
-      const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/tournaments/${id}/squad`, {
+      const response = await fetch(`${API_BASE_URL}/api/tournaments/${id}/squad`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
@@ -64,7 +64,7 @@ const AdminSquad = () => {
     if(!window.confirm("Remove this player from the squad?")) return;
 
     try {
-        const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/tournaments/${id}/squad/${userId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/tournaments/${id}/squad/${userId}`, {
             method: "DELETE"
         });
 

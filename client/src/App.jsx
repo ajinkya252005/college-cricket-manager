@@ -36,7 +36,7 @@ function App() {
 
   async function isAuth() {
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
+      const response = await fetch("${API_BASE_URL}/api/auth/verify", {
         method: "GET",
         headers: { token: localStorage.getItem("token") },
       });

@@ -8,7 +8,7 @@ const TeamAnalytics = ({ setAuth }) => {
 
   const getAnalytics = async () => {
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/team/analytics", {
+      const response = await fetch("${API_BASE_URL}/api/team/analytics", {
         method: "GET",
         headers: { token: localStorage.getItem("token") },
       });
