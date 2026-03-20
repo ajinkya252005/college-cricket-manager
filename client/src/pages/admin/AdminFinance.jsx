@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 const AdminFinance = () => {
   const [activeTab, setActiveTab] = useState("practice"); 
@@ -32,11 +33,11 @@ const AdminFinance = () => {
 
   const fetchData = async () => {
     try {
-      const playRes = await fetch("https://cricket-api-ll8u.onrender.com/api/players");
-      const sessRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/pending-practice");
-      const fundRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/funds");
-      const ledg = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/ledger");
-      const tourRes = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/pending-tournaments");
+      const playRes = await fetch(`${API_BASE_URL}/api/players`);
+      const sessRes = await fetch(`${API_BASE_URL}/api/finance/pending-practice`);
+      const fundRes = await fetch(`${API_BASE_URL}/api/finance/funds`);
+      const ledg = await fetch(`${API_BASE_URL}/api/finance/ledger`);
+      const tourRes = await fetch(`${API_BASE_URL}/api/finance/pending-tournaments`);
 
       if (playRes.ok) setPlayers(await playRes.json());
       
@@ -62,7 +63,7 @@ const AdminFinance = () => {
   const handleBillPractice = async (session) => {
       if(!billAmount || !manualSplit) return toast.warning("Enter amounts!");
       try {
-          await fetch("https://cricket-api-ll8u.onrender.com/api/finance/bill/practice", {
+          await fetch(`${API_BASE_URL}/api/finance/bill/practice`, {
               method: "POST",
               headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
               body: JSON.stringify({ 
@@ -89,7 +90,7 @@ const AdminFinance = () => {
           date: customDate
       };
       try {
-          await fetch("https://cricket-api-ll8u.onrender.com/api/finance/bill/general", {
+          await fetch(`${API_BASE_URL}/api/finance/bill/general`, {
               method: "POST",
               headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
               body: JSON.stringify(payload)
@@ -103,7 +104,7 @@ const AdminFinance = () => {
   const handleReimburse = async (recordId, current) => {
       const val = prompt("Enter Reimbursed Amount:", current);
       if(val !== null) {
-          await fetch(`https://cricket-api-ll8u.onrender.com/api/finance/reimburse/${recordId}`, {
+          await fetch(`${API_BASE_URL}/api/finance/reimburse/${recordId}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
               body: JSON.stringify({ amount: val })
@@ -121,7 +122,7 @@ const AdminFinance = () => {
     e.preventDefault();
     try {
       const body = { ...formData, user_id: formData.user_id || null };
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/add", {
+      const response = await fetch(`${API_BASE_URL}/api/finance/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
         body: JSON.stringify(body),
@@ -136,7 +137,7 @@ const AdminFinance = () => {
 
   const handleFundUpdate = async () => {
       try {
-        const response = await fetch("https://cricket-api-ll8u.onrender.com/api/finance/funds/update", {
+        const response = await fetch(`${API_BASE_URL}/api/finance/funds/update`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
             body: JSON.stringify({ amount: fundForm.amount, type: fundModal, description: fundForm.description })
@@ -148,7 +149,7 @@ const AdminFinance = () => {
   const markAsPaid = async (id) => {
       if(!window.confirm("Confirm payment received?")) return;
       try {
-          const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/finance/mark-paid/${id}`, {
+          const response = await fetch(`${API_BASE_URL}/api/finance/mark-paid/${id}`, {
               method: "PUT",
               headers: { "token": localStorage.getItem("token") }
           });
@@ -159,7 +160,7 @@ const AdminFinance = () => {
     const newAmount = prompt(`Enter Reimbursement Amount (Total: ₹${totalAmount})`, currentAmount);
     if (newAmount !== null) { 
         try {
-            await fetch(`https://cricket-api-ll8u.onrender.com/api/finance/reimburse/${id}`, {
+            await fetch(`${API_BASE_URL}/api/finance/reimburse/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
                 body: JSON.stringify({ amount: newAmount })

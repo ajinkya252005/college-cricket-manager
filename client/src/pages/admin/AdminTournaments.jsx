@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 const AdminTournaments = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -13,7 +14,7 @@ const AdminTournaments = () => {
   // Fetch existing tournaments
   const getTournaments = async () => {
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments");
+      const response = await fetch(`${API_BASE_URL}/api/tournaments`);
       const jsonData = await response.json();
       setTournaments(jsonData);
     } catch (err) {
@@ -31,7 +32,7 @@ const AdminTournaments = () => {
   const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments", {
+      const response = await fetch(`${API_BASE_URL}/api/tournaments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

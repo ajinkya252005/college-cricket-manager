@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 // --- HELPER COMPONENTS (Moved Outside) ---
 
@@ -121,7 +122,7 @@ const AdminScorecard = () => {
     const fetchInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-        const matchRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, { headers: { token } });
+        const matchRes = await fetch(`${API_BASE_URL}/api/matches/${id}`, { headers: { token } });
         const matchData = await matchRes.json();
         setMatchDetails(matchData);
 
@@ -134,7 +135,7 @@ const AdminScorecard = () => {
         }
 
         if (matchData.tournament_id) {
-            const squadRes = await fetch(`https://cricket-api-ll8u.onrender.com/api/tournaments/${matchData.tournament_id}/squad`);
+            const squadRes = await fetch(`${API_BASE_URL}/api/tournaments/${matchData.tournament_id}/squad`);
             const squadData = await squadRes.json();
             setSquad(squadData);
             
@@ -242,7 +243,7 @@ const AdminScorecard = () => {
     try {
         const fullResultString = `Toss: ${toss.winner === 'us' ? 'We' : 'Opponent'} elected to ${toss.decision}. Result: ${resultText}`;
         
-        const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}/scorecard`, {
+        const response = await fetch(`${API_BASE_URL}/api/matches/${id}/scorecard`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "token": localStorage.getItem("token") },
             body: JSON.stringify({ 

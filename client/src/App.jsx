@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API_BASE_URL } from "./config";
 
 // Components
 import Login from "./pages/Login";
@@ -36,7 +37,7 @@ function App() {
 
   async function isAuth() {
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
         method: "GET",
         headers: { token: localStorage.getItem("token") },
       });
@@ -70,7 +71,14 @@ function App() {
         <Routes>
           <Route
             path="/login"
-            element={!isAuthenticated ? <Login setAuth={setAuth} setUserRole={setUserRole} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />}
+            element={!isAuthenticated ?
+              <Login setAuth={setAuth} setUserRole={setUserRole} /> :
+              <Navigate to={
+                userRole === "admin" ? "/admin-dashboard" :
+                  userRole === "team" ? "/team/analytics" :
+                    "/dashboard"
+              } />
+            }
           />
           <Route
             path="/register"

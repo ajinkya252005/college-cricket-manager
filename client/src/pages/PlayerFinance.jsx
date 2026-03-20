@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const PlayerFinance = () => {
   const [categories, setCategories] = useState({ practice: [], tournament: [], other: [] });
@@ -9,14 +10,14 @@ const PlayerFinance = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const verifyRes = await fetch("https://cricket-api-ll8u.onrender.com/api/auth/verify", {
+        const verifyRes = await fetch(`${API_BASE_URL}/api/auth/verify`, {
             method: "GET",
             headers: { token: localStorage.getItem("token") }
         });
         const user = await verifyRes.json();
 
         if (user.user_id) {
-            const res = await fetch(`https://cricket-api-ll8u.onrender.com/api/finance/my/${user.user_id}`);
+            const res = await fetch(`${API_BASE_URL}/api/finance/my/${user.user_id}`);
             const data = await res.json();
 
             // 1. Calculate Totals

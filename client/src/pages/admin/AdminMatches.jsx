@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 const AdminMatches = () => {
   const [matches, setMatches] = useState([]);
@@ -15,8 +16,8 @@ const AdminMatches = () => {
   // Fetch Data
   const fetchData = async () => {
     try {
-      const matchRes = await fetch("https://cricket-api-ll8u.onrender.com/api/matches");
-      const tournRes = await fetch("https://cricket-api-ll8u.onrender.com/api/tournaments");
+      const matchRes = await fetch(`${API_BASE_URL}/api/matches`);
+      const tournRes = await fetch(`${API_BASE_URL}/api/tournaments`);
 
       setMatches(await matchRes.json());
       setTournaments(await tournRes.json());
@@ -32,7 +33,7 @@ const AdminMatches = () => {
 
     if (confirmDelete) {
       try {
-        const response = await fetch(`https://cricket-api-ll8u.onrender.com/api/matches/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/matches/${id}`, {
           method: "DELETE",
           headers: { token: localStorage.getItem("token") },
         });
@@ -60,7 +61,7 @@ const AdminMatches = () => {
   const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://cricket-api-ll8u.onrender.com/api/matches", {
+      const response = await fetch(`${API_BASE_URL}/api/matches`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -263,4 +264,4 @@ const AdminMatches = () => {
 };
 
 export default AdminMatches;
-//https://cricket-api-ll8u.onrender.com/api/matches/${id}
+//${API_BASE_URL}/api/matches/${id}

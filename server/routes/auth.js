@@ -97,36 +97,29 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// auth.js
 router.post("/team-login", async (req, res) => {
   try {
     const { player_id, password } = req.body;
-
-    const user = await pool.query(
-      "SELECT * FROM users WHERE player_id = $1",
-      [player_id]
-    );
+    const user = await pool.query("SELECT * FROM users WHERE player_id = $1", [player_id]);
 
     if (user.rows.length === 0) {
       return res.status(401).json("Password or Player ID is incorrect");
     }
 
-    const validPassword = await bcrypt.compare(
-      password,
-      user.rows[0].password_hash
-    );
-
+    const validPassword = await bcrypt.compare(password, user.rows[0].password_hash);
     if (!validPassword) {
       return res.status(401).json("Password or Player ID is incorrect");
     }
 
+    // FIX: Explicitly set role to "team" in the token
     const token = jwt.sign(
-      { user: user.rows[0].user_id, role: user.rows[0].user_role },
+      { user: user.rows[0].user_id, role: "team" }, 
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
     res.json({ token, user: user.rows[0] });
-
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -138,32 +131,20 @@ router.post("/team-login", async (req, res) => {
 router.get("/verify", async (req, res) => {
   try {
     const token = req.header("token");
-
-    if (!token) {
-      return res.status(403).json("Not Authorized");
-    }
+    if (!token) return res.status(403).json("Not Authorized");
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 1. CHECK IF THIS IS THE TEAM ADMIN
-    if (payload.role === "admin") {
-      // Return a mock user object for the frontend to use
+    // Recognise either Admin or Team roles from the token
+    if (payload.role === "admin" || payload.role === "team") {
       return res.json({ 
-        user_name: "aj2005", 
-        role: "admin",
-        is_admin: true 
+        role: payload.role, 
+        user_id: payload.user 
       });
     }
 
-    // 2. OTHERWISE, CHECK DATABASE FOR REGULAR USER
-    // Ensure payload.user exists before querying
-    if (!payload.user) {
-        return res.status(403).json("Invalid Token Structure");
-    }
-
-    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [
-      payload.user,
-    ]);
+    // Default player check...
+    const user = await pool.query("SELECT * FROM users WHERE user_id = $1", [payload.user]);
 
     if (user.rows.length === 0) {
         return res.status(403).json("User not found");
