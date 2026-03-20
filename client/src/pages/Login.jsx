@@ -8,8 +8,8 @@ const Login = ({ setAuth, setUserRole }) => {
     player_id: "",
     password: "",
   });
-  
-  const [loginType, setLoginType] = useState("player"); 
+
+  const [loginType, setLoginType] = useState("player");
   const [loading, setLoading] = useState(false);
 
   const { player_id, password } = inputs;
@@ -21,18 +21,18 @@ const Login = ({ setAuth, setUserRole }) => {
   const onSubmitForm = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       let url = "";
       let body = {};
 
       // 1. Configure Endpoint & Body
       if (loginType === "team") {
-        url = `${API_BASE_URL}/api/auth/team-login`; 
+        url = `${API_BASE_URL}/api/auth/team-login`;
         // Now sending user_id (from player_id state) and password
-        body = { user_id: player_id, password }; 
+        body = { player_id, password };
       } else {
-        url = `${API_BASE_URL}/api/auth/login`; 
+        url = `${API_BASE_URL}/api/auth/login`;
         body = { player_id, password };
       }
 
@@ -45,29 +45,34 @@ const Login = ({ setAuth, setUserRole }) => {
       const parseRes = await response.json();
 
       if (response.ok) {
+        // 1. PERFORM ROLE VALIDATION FIRST
+        if (loginType === "admin") {
+          if (!parseRes.user || parseRes.user.role !== "admin") {
+            toast.error("Access Denied: You are not an Admin!");
+            setLoading(false);
+            return; // Stop here! Do not call setAuth(true)
+          }
+          setUserRole("admin");
+          toast.success("Welcome Admin!");
+        } else if (loginType === "team") {
+          setUserRole("team");
+          toast.success("Team Access Granted!");
+        } else {
+          setUserRole("player");
+          toast.success("Login Successful!");
+        }
+
+        // 2. ONLY SET AUTH AFTER PASSING VALIDATION
         localStorage.setItem("token", parseRes.token);
         setAuth(true);
 
-        // 2. Handle Redirects & Roles
+        // 3. NAVIGATE
         if (loginType === "team") {
-           setUserRole("team"); 
-           toast.success("Team Access Granted!");
-           navigate("/team/analytics");
-        } 
-        else if (loginType === "admin") {
-           if (parseRes.user && parseRes.user.role !== "admin") {
-             toast.error("Access Denied: You are not an Admin!");
-             setLoading(false); 
-             return; 
-           }
-           setUserRole("admin");
-           toast.success("Welcome Admin!");
-           // navigate("/admin/dashboard");
-        } 
-        else {
-           setUserRole("player");
-           toast.success("Login Successful!");
-           navigate("/dashboard");
+          navigate("/team/analytics");
+        } else if (loginType === "admin") {
+          navigate("/admin-dashboard"); // Added this to ensure admin goes to right place
+        } else {
+          navigate("/dashboard");
         }
 
       } else {
@@ -83,13 +88,13 @@ const Login = ({ setAuth, setUserRole }) => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center relative overflow-hidden p-4">
-      
+
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md bg-gray-800/50 backdrop-blur-lg border border-gray-700 p-8 rounded-3xl shadow-2xl relative z-10">
-        
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black text-white tracking-tight mb-2">
             {loginType === "team" ? "Team Access" : "Welcome Back"}
@@ -101,21 +106,21 @@ const Login = ({ setAuth, setUserRole }) => {
 
         {/* TABS */}
         <div className="flex bg-gray-900/50 p-1 rounded-xl mb-8 border border-gray-700">
-          <button 
+          <button
             type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "player" ? "bg-blue-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("player")}
           >
             Player
           </button>
-          <button 
+          <button
             type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "admin" ? "bg-purple-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("admin")}
           >
             Admin
           </button>
-          <button 
+          <button
             type="button"
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${loginType === "team" ? "bg-green-600 text-white shadow-lg" : "text-gray-400 hover:text-white"}`}
             onClick={() => setLoginType("team")}
@@ -125,7 +130,7 @@ const Login = ({ setAuth, setUserRole }) => {
         </div>
 
         <form onSubmit={onSubmitForm} className="space-y-5">
-          
+
           {/* User ID Input - Visible for ALL types now */}
           <div className="animate-fade-in-down">
             <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">
@@ -141,7 +146,7 @@ const Login = ({ setAuth, setUserRole }) => {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">
               Password
@@ -157,13 +162,12 @@ const Login = ({ setAuth, setUserRole }) => {
             />
           </div>
 
-          <button 
+          <button
             disabled={loading}
-            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform hover:scale-[1.02] ${
-              loginType === 'admin' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-purple-500/30' : 
-              loginType === 'team' ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-green-500/30' :
-              'bg-gradient-to-r from-blue-600 to-cyan-600 hover:shadow-blue-500/30'
-            }`}
+            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all transform hover:scale-[1.02] ${loginType === 'admin' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-purple-500/30' :
+                loginType === 'team' ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-green-500/30' :
+                  'bg-gradient-to-r from-blue-600 to-cyan-600 hover:shadow-blue-500/30'
+              }`}
           >
             {loading ? "Authenticating..." : loginType === "team" ? "View Analytics" : "Access Dashboard"}
           </button>

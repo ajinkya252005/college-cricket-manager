@@ -71,7 +71,14 @@ function App() {
         <Routes>
           <Route
             path="/login"
-            element={!isAuthenticated ? <Login setAuth={setAuth} setUserRole={setUserRole} /> : <Navigate to={userRole === "admin" ? "/admin-dashboard" : "/dashboard"} />}
+            element={!isAuthenticated ?
+              <Login setAuth={setAuth} setUserRole={setUserRole} /> :
+              <Navigate to={
+                userRole === "admin" ? "/admin-dashboard" :
+                  userRole === "team" ? "/team/analytics" :
+                    "/dashboard"
+              } />
+            }
           />
           <Route
             path="/register"
