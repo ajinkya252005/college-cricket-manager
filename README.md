@@ -3,10 +3,23 @@
 
 ![License](https://img.shields.io/badge/License-MIT-green.svg) ![Stack](https://img.shields.io/badge/Stack-PERN-blue.svg) ![Status](https://img.shields.io/badge/Status-Production_Ready-orange.svg)
 
+<div align="center">
+  <p align="center">
+    <br />
+    <a href="https://college-cricket-manager.vercel.app/"><strong>View Live Demo »</strong></a>
+  </p>
+</div>
+
 A high-performance, full-stack **PERN** application (PostgreSQL, Express, React, Node.js) designed to be the ultimate operating system for managing a college cricket team. It digitizes the entire ecosystem—from **Ball-by-Ball Scorecards** to **Financial Ledgers** and **Player Analytics**.
 
 ---
+## 📖 The Story: Why I Built This
 
+Initially, I managed all the documentation, attendance, and complex financial calculations for our college cricket team using Excel spreadsheets. It quickly became a logistical nightmare—tracking specific financial cases, mapping attendance to contributions, and manually updating player stats required endless formula tweaks and cell selections. 
+
+I built this platform to turn a messy, manual task into a seamless digital experience. By automating the math, tracking, and statistical aggregation, this platform allows the team to focus on the game, not the paperwork.
+
+---
 ## 🚀 Features at a Glance
 
 ### 👑 Admin Command Center (God Mode)
@@ -74,15 +87,21 @@ A high-performance, full-stack **PERN** application (PostgreSQL, Express, React,
 
 ---
 
-## 🗄️ Database Schema (Relational)
+## 🗄️ Database Architecture
 
-The system relies on a normalized PostgreSQL structure hosted on **NeonDB**.
+The PostgreSQL database (`college_cricket_db`) is highly normalized to handle complex relational data:
 
-* **`users`**: Stores profile, career totals, academic year, and lifecycle status (`active`/`alumni`/`pending`).
-* **`matches`**: Stores fixture info, result summaries, and JSON snapshots for UI restoration.
-* **`match_participation`**: Linked table tracking granular stats (balls faced, maiden overs, dismissal type) for every player in every match.
-* **`finance_records`**: Double-entry ledger tracking bills (`amount`) vs collections (`reimbursed_amount`), linked to specific Events or Tournaments.
-* **`attendance_logs`**: Links users to specific `attendance_events`.
-* **`tournaments`**: Parent table for grouping matches and managing squad lists.
+| Table | Description |
+| :--- | :--- |
+| `users` | Core table for authentication and player profiles (branch, year, lifetime stats). |
+| `attendance_events` | Tracks all practice sessions, meetings, and match days. |
+| `attendance_logs` | Maps individual players to specific events (Present/Absent). |
+| `finance_records` | Detailed ledger of player payments, dues, and reimbursements. |
+| `matches` | Records of all games played, including opponents, dates, and outcomes. |
+| `match_participation`| Granular, match-by-match stats for individual players (Runs, Wickets, etc.). |
+| `opponent_participation`| Tracks opponent details for comprehensive match scorecards. |
+| `team_funds` | Central treasury tracker for total team balance. |
+| `tournaments` | High-level grouping for multiple matches and specific fee structures. |
+| `tournament_squads` | Manages the locked roster of players selected for specific tournaments. |
 
 ---
